@@ -149,11 +149,11 @@ body {
 .plate-preview-card .mini-plate { width: 100%; }
 .plate-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; }
 
-.plate-shell { width: 100%; display: flex; justify-content: flex-start; overflow: visible; padding: 10px 0; }
+.plate-shell { width: 100%; display: flex; justify-content: flex-start; overflow: visible; padding: 16px 0; }
 .plate-mini {
   display: grid;
-  grid-template-columns: 36px repeat(24, 1fr);
-  grid-template-rows: 32px repeat(16, 1fr);
+  grid-template-columns: 42px repeat(24, minmax(26px, 1fr));
+  grid-template-rows: 36px repeat(16, minmax(26px, 1fr));
   gap: 2px;
   padding: 14px;
   border-radius: 16px;
@@ -163,15 +163,15 @@ body {
     radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
   width: 100%;
   max-width: 100%;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 30px rgba(0,0,0,0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 16px 44px rgba(0,0,0,0.30);
 }
 
 /* Support for plate-grid structure used in App.tsx (mirrors plate-mini styling) */
-.plate-grid-wrapper { display: flex; justify-content: flex-start; overflow: visible; padding: 10px 0; width: 100%; }
+.plate-grid-wrapper { display: flex; justify-content: flex-start; overflow: visible; padding: 16px 0; width: 100%; }
 .plate-grid {
   display: grid;
-  grid-template-columns: 36px repeat(24, 1fr);
-  grid-template-rows: 32px repeat(16, 1fr);
+  grid-template-columns: 42px repeat(24, minmax(26px, 1fr));
+  grid-template-rows: 36px repeat(16, minmax(26px, 1fr));
   gap: 2px;
   padding: 14px;
   border-radius: 16px;
@@ -181,11 +181,11 @@ body {
     radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
   width: 100%;
   max-width: 100%;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 30px rgba(0,0,0,0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 16px 44px rgba(0,0,0,0.30);
 }
 .corner { width: 36px; height: 32px; }
-.col-head, .row-head { display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; font-size: 11px; color: #e3ebff; font-weight: 700; }
-.row-head { width: 36px; }
+.col-head, .row-head { display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; font-size: 14px; color: #f4f7ff; font-weight: 900; }
+.row-head { width: 42px; }
 .well-dot {
   width: var(--cell);
   height: var(--cell);
@@ -209,9 +209,9 @@ body {
 .well-square {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 5px;
+  border-radius: 6px;
   background: #0b1221;
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1.2px solid rgba(255, 255, 255, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,8 +220,8 @@ body {
   transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
 }
 .well-square:hover {
-  border-color: rgba(255, 255, 255, 0.28);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 6px 12px rgba(0,0,0,0.35);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 8px 14px rgba(0,0,0,0.38);
   transform: translateY(-1px);
 }
 .well-square.sample { background: #3ecbff; }
@@ -230,7 +230,7 @@ body {
 .well-square.negative { background: #a78bfa; }
 .well-square.blank { background: #94a3b8; }
 .well-square.empty { background: #101828; border-color: rgba(255, 255, 255, 0.06); }
-.well-label { font-size: 7px; font-weight: 700; color: #e2e8f0; line-height: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); letter-spacing: 0.02em; }
+.well-label { font-size: 12px; font-weight: 900; color: #fefefe; line-height: 1; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); letter-spacing: 0.01em; }
 .well-dot.sample { background: #3ecbff; }
 .well-dot.standard { background: #22c55e; }
 .well-dot.positive { background: #f59e0b; }
