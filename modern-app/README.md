@@ -1,23 +1,16 @@
-# cDNA Calculations (React + FastAPI)
+# qPCR Calculations (React + FastAPI)
 
-Modern rewrite of the RT mix helper. Paste sample concentrations, set a target ng, and get per-sample RNA/H₂O volumes, pre-dilution guidance when pipet volumes are too small, and master-mix totals. CSV/Excel export and clipboard copy are built in. Playwright E2E drives the bundled example and regenerates the screenshot.
+Paste sample lists, pick genes/chemistry/replicates, set controls/overage, and get 384-well layouts plus master-mix totals. Styled to match the timeline app’s dark Premiere-like look. Playwright smoke produces the screenshots and a short video below (backend calls are mocked for captures).
 
-Screenshots
-------------
-Latest autoplay set (Playwright)
-| Plan (pre-calc) | Full layout + mix | Master mix card | Notes card |
-| --- | --- | --- | --- |
-| ![Plan view](screenshots/plan_view.png) | ![Full layout](screenshots/layout_full.png) | ![Master mix card](screenshots/master_mix.png) | ![Notes card](screenshots/notes_card.png) |
+Latest captures (Playwright):
 
-Tab views
-| Plan tab | Output table | Master mix | Notes & rules |
-| --- | --- | --- | --- |
-| ![Plan tab](screenshots/plan_tab.png) | ![Output table](screenshots/output_tab.png) | ![Master mix](screenshots/master_tab.png) | ![Notes & rules](screenshots/notes_tab.png) |
+| Plan | Plate preview | Output table | Master mix | Notes |
+| --- | --- | --- | --- | --- |
+| ![Plan](screenshots/plan_tab.png) | ![Plate preview](screenshots/plate_preview.png) | ![Output](screenshots/output_tab.png) | ![Master mix](screenshots/master_tab.png) | ![Notes](screenshots/notes_tab.png) |
 
-End-to-end example
-| Example run |
-| --- |
-| ![Example run](screenshots/example_run.png) |
+Run-through video:
+
+<video src="screenshots/example_run.webm" controls width="820"></video>
 
 ## Highlights
 - Input: tab/comma/space-separated `Sample,Conc` with header.
