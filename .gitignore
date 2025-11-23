@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+.npm/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# build outputs
+dist/
+.tmp/
+tmpfile
+
+# test artifacts
+test-results/
+playwright-report/
+
+# editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
