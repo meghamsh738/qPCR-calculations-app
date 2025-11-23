@@ -498,19 +498,22 @@ function App() {
                 <table className="data layout-table">
                   <thead>
                     <tr>
-                      {['Plate','Well','Gene','Type','Label','Replicate','Group'].map(h => <th key={h}>{h}</th>)}
+                      {['Well','Gene','Type','Label','Replicate','Group','Plate'].map(h => <th key={h}>{h}</th>)}
                     </tr>
                   </thead>
                   <tbody>
                     {filteredLayout.map((row, idx) => (
                       <tr key={idx}>
-                        <td>{row.Plate}</td>
                         <td>{row.Well}</td>
                         <td>{row.Gene}</td>
-                        <td>{row.Type}</td>
+                        <td className="type-cell">
+                          <span className={`type-dot type-${row.Type.toLowerCase().replace(/[^a-z]/g, '')}`}>●</span>
+                          {row.Type}
+                        </td>
                         <td>{row.Label}</td>
                         <td className="num">{row.Replicate}</td>
                         <td>{row.Group || ''}</td>
+                        <td className="plate-cell">{row.Plate}</td>
                       </tr>
                     ))}
                   </tbody>

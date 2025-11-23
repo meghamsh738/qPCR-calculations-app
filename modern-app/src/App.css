@@ -308,6 +308,14 @@ body {
 .data th, .data td { padding: 10px 12px; border-bottom: 1px solid #22304a; text-align: left; }
 .data tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
 .data .num { text-align: right; font-variant-numeric: tabular-nums; }
+.data.layout-table td.plate-cell { color: #9fb0cc; text-align: right; }
+.data.layout-table td.type-cell { display: flex; align-items: center; gap: 6px; font-weight: 800; }
+.type-dot { font-size: 10px; }
+.type-sample { color: #22c55e; }
+.type-standard { color: #0ea5e9; }
+.type-positive { color: #f59e0b; }
+.type-negative { color: #a855f7; }
+.type-blank { color: #cbd5e1; }
 
 .empty { padding: 16px; border: 1px dashed #2f3d59; border-radius: 12px; background: rgba(255, 255, 255, 0.02); color: #9fb0cc; text-align: center; }
 
