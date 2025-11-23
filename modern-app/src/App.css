@@ -149,11 +149,11 @@ body {
 .plate-preview-card .mini-plate { width: 100%; }
 .plate-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; }
 
-.plate-shell { width: 100%; display: flex; justify-content: flex-start; overflow: visible; padding: 18px 0; }
+.plate-shell { width: 100%; display: flex; justify-content: flex-start; overflow: auto; padding: 18px 0; max-height: 720px; }
 .plate-mini {
   display: grid;
   grid-template-columns: 46px repeat(24, minmax(30px, 1fr));
-  grid-template-rows: 38px repeat(16, minmax(30px, 1fr));
+  grid-template-rows: 40px repeat(16, minmax(30px, 1fr));
   gap: 2px;
   padding: 14px;
   border-radius: 16px;
@@ -167,11 +167,11 @@ body {
 }
 
 /* Support for plate-grid structure used in App.tsx (mirrors plate-mini styling) */
-.plate-grid-wrapper { display: flex; justify-content: flex-start; overflow: visible; padding: 18px 0; width: 100%; }
+.plate-grid-wrapper { display: flex; justify-content: flex-start; overflow: auto; padding: 18px 0; width: 100%; max-height: 720px; }
 .plate-grid {
   display: grid;
   grid-template-columns: 46px repeat(24, minmax(30px, 1fr));
-  grid-template-rows: 38px repeat(16, minmax(30px, 1fr));
+  grid-template-rows: 40px repeat(16, minmax(30px, 1fr));
   gap: 2px;
   padding: 14px;
   border-radius: 16px;
@@ -183,9 +183,10 @@ body {
   max-width: 100%;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 16px 44px rgba(0,0,0,0.30);
 }
-.corner { width: 46px; height: 38px; }
+.corner { width: 46px; height: 40px; position: sticky; top: 0; left: 0; z-index: 5; background: #0f172a; }
 .col-head, .row-head { display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; font-size: 15px; color: #f7faff; font-weight: 900; }
-.row-head { width: 46px; }
+.row-head { width: 46px; position: sticky; left: 0; z-index: 4; background: #0f172a; }
+.col-head { position: sticky; top: 0; z-index: 3; background: #0f172a; }
 .well-dot {
   width: var(--cell);
   height: var(--cell);
