@@ -18,7 +18,7 @@ test('qPCR planner flow', async ({ page }) => {
   const cards = page.locator('section.card')
   await cards.nth(0).screenshot({ path: 'screenshots/plan_tab.png' })
   await page.getByRole('button', { name: 'Plate preview' }).click()
-  await page.locator('.plate-mini').screenshot({ path: 'screenshots/plate_preview.png' })
+  await page.locator('.plate-grid').screenshot({ path: 'screenshots/plate_preview.png' })
 
   await page.getByTestId('calculate-btn').click()
   // Confirm plan finished and spans multiple plates
