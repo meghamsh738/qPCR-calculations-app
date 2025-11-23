@@ -4,9 +4,9 @@ Paste samples, pick genes/chemistry/replicates, add controls/overage, and get mu
 
 Latest captures (Playwright mock, 10 samples):
 
-| Plan | Plate preview | Output table | Master mix | Notes |
+| App overview | Plate preview | Output table | Master mix | Notes |
 | --- | --- | --- | --- | --- |
-| ![Plan](screenshots/plan_tab.png) | ![Plate](screenshots/plate_preview.png) | ![Output](screenshots/output_tab.png) | ![Master mix](screenshots/master_tab.png) | ![Notes](screenshots/notes_tab.png) |
+| ![App](screenshots/app_overview.png) | ![Plate](screenshots/plate_preview.png) | ![Output](screenshots/output_tab.png) | ![Master mix](screenshots/master_tab.png) | ![Notes](screenshots/notes_tab.png) |
 
 Run-through video:
 
