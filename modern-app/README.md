@@ -1,29 +1,32 @@
 # qPCR Calculations (React + FastAPI)
 
-Paste sample lists, pick genes/chemistry/replicates, set controls/overage, and get 384-well layouts plus master-mix totals. Styled to match the timeline app’s dark Premiere-like look. Playwright smoke produces the screenshots and a short video below (backend calls are mocked for captures).
+Paste samples, pick genes/chemistry/replicates, add controls/overage, and get multi-plate 384-well layouts plus master-mix totals. Styling matches the timeline app’s dark Premiere-like look. Screenshots below are Playwright captures with a mocked backend that returns two plates (Plate 1 full, Plate 2 partially filled).
 
-Latest captures (Playwright):
+Latest captures (Playwright mock):
 
-| Plan | Plate preview | Output table | Master mix | Notes |
-| --- | --- | --- | --- | --- |
-| ![Plan](screenshots/plan_tab.png) | ![Plate preview](screenshots/plate_preview.png) | ![Output](screenshots/output_tab.png) | ![Master mix](screenshots/master_tab.png) | ![Notes](screenshots/notes_tab.png) |
+| Plan & inputs | Plate 1 preview | Plate 2 preview |
+| --- | --- | --- |
+| ![Plan](screenshots/plan_tab.png) | ![Plate 1](screenshots/plate_preview.png) | ![Plate 2](screenshots/plate_preview_plate2.png) |
+
+| Output table | Master mix | Notes |
+| --- | --- | --- |
+| ![Output](screenshots/output_tab.png) | ![Master mix](screenshots/master_tab.png) | ![Notes](screenshots/notes_tab.png) |
 
 Run-through video:
 
 <video src="screenshots/example_run.webm" controls width="820"></video>
 
 ## Highlights
-- Input: tab/comma/space-separated `Sample,Conc` with header.
-- Logic parity with legacy: fixed reagents (10x buffer, dNTPs, random primers, enzyme), 20 µl final, 10% overage default, pre-dilution suggestions below 0.5 µl RNA, master mix summary row.
-- Outputs: interactive table, CSV export, Excel export, clipboard TSV.
-- Example data: `example_data/samples.csv`.
+- 384-well 16×24 grid; replicates stay adjacent in-row.
+- Genes never split across plates; overflow moves the gene to the next plate. Optional per-gene plate overrides.
+- Controls: standards, positives, RT−, RNA−, blanks; adjustable mix overage for master-mix only.
+- Outputs: interactive table, TSV copy, CSV/Excel export hooks, per-gene master-mix volumes.
 
 ## Setup (D:)
 ```bash
-cd "<PROJECTS_DIR>/cDNA-calculations-app/modern-app"
-# If node_modules is missing
+cd "<PROJECTS_DIR>/qpcr-calculations-app-git/modern-app"
+# If npm install fails on NTFS, run in WSL home and copy node_modules back.
 npm install
-# Backend deps
 python3 -m venv .venv
 ./.venv/bin/pip install --break-system-packages -r backend/requirements.txt
 ```
@@ -32,18 +35,15 @@ python3 -m venv .venv
 ```bash
 npm run dev:full   # front :5176, API :8003
 ```
-Open http://localhost:5176, toggle **Use Example Data**, and click **Calculate Volumes**.
+Open http://localhost:5176 and click **Compute layout** (or mock `/plan` if you just want UI).
 
-## Tests & screenshot
+## Tests & screenshots
 ```bash
-npx playwright install --with-deps chromium   # once, if not already installed
-npm run test:e2e
+npx playwright install chromium   # once
+npm run test:e2e                  # basic smoke
 ```
-The E2E starts both servers, runs the example flow, and writes `screenshots/example_run.png`.
+To regenerate the gallery with mocked `/plan`, start `npm run preview -- --host --port 5176` and run the Playwright snippet from the dev notes (routes `/plan` and saves into `screenshots/`).
 
 ## API
-- `POST /calculate` → rows + master_mix (body: samples[], target_ng, overage_pct, use_example?)
-- `POST /export-excel` → Excel workbook with the grid
-- `GET /example`, `GET /health`
-
-All endpoints honor `use_example: true` to run without user data.
+- `POST /plan` → layout[], mix[], summary[] (body includes samples, genes, controls, overage, overrides)
+- `GET /health`
