@@ -19,7 +19,7 @@ body {
 }
 
 .page {
-  max-width: 1240px;
+  max-width: 1360px;
   margin: 0 auto 64px;
   padding: 32px 22px 64px;
   display: flex;
@@ -143,13 +143,14 @@ body {
 .help { margin: 4px 0; color: #9fb0cc; font-size: 13px; }
 
 .preview { margin-top: 14px; background: #0f1724; color: #e5edff; border-radius: 16px; padding: 16px; border: 1px solid #24324c; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03); }
+.preview.wide { grid-column: 1 / -1; }
 
 .mini-plate { margin-top: 12px; display: grid; gap: 12px; }
 .plate-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; }
 
 .plate-shell { width: 100%; display: flex; justify-content: center; overflow-x: auto; padding: 6px 0; }
 .plate-mini {
-  --cell: clamp(14px, 2vw, 20px);
+  --cell: clamp(16px, 2.6vw, 24px);
   display: grid;
   grid-template-columns: 32px repeat(24, var(--cell));
   grid-template-rows: 28px repeat(16, var(--cell));
@@ -168,7 +169,7 @@ body {
 /* Support for plate-grid structure used in App.tsx (mirrors plate-mini styling) */
 .plate-grid-wrapper { display: flex; justify-content: center; overflow-x: auto; padding: 6px 0; width: 100%; }
 .plate-grid {
-  --cell: clamp(14px, 2vw, 20px);
+  --cell: clamp(16px, 2.6vw, 24px);
   display: grid;
   grid-template-columns: 32px repeat(24, var(--cell));
   grid-template-rows: 28px repeat(16, var(--cell));
@@ -230,7 +231,7 @@ body {
 .well-square.negative { background: #a78bfa; }
 .well-square.blank { background: #94a3b8; }
 .well-square.empty { background: #101828; border-color: rgba(255, 255, 255, 0.06); }
-.well-label { font-size: 9px; font-weight: 700; color: #e2e8f0; line-height: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.well-label { font-size: 7px; font-weight: 700; color: #e2e8f0; line-height: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); letter-spacing: 0.02em; }
 .well-dot.sample { background: #3ecbff; }
 .well-dot.standard { background: #22c55e; }
 .well-dot.positive { background: #f59e0b; }

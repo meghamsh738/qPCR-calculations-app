@@ -299,7 +299,7 @@ function App() {
             <p className="help">Format: Name[tab/comma/space]Group (Group optional). Order is preserved.</p>
           </div>
 
-          <div className="preview">
+          <div className="preview wide">
             <div className="side-head">
               <p className="kicker">Example</p>
               <span className="pill ghost">{usePasted ? 'Pasted list' : '# count only'}</span>
@@ -364,8 +364,8 @@ function App() {
                                 style={style}
                               >
                                 {cell && (
-                                  <span className="text-[9px] font-semibold text-slate-50 leading-none drop-shadow-sm">
-                                    {cell.Label ? cell.Label.slice(0, 3) : cell.Gene.slice(0, 3)}
+                                  <span className="well-label">
+                                    {cell.Label ? cell.Label.slice(0, 4) : cell.Gene.slice(0, 4)}
                                   </span>
                                 )}
                               </div>

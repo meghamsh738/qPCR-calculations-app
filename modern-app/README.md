@@ -1,12 +1,12 @@
 # qPCR Calculations (React + FastAPI)
 
-Paste samples, pick genes/chemistry/replicates, add controls/overage, and get multi-plate 384-well layouts plus master-mix totals. Styling matches the timeline app’s dark Premiere-like look. Screenshots below are Playwright captures with a mocked backend that returns two plates (Plate 1 full, Plate 2 partially filled).
+Paste samples, pick genes/chemistry/replicates, add controls/overage, and get multi-plate 384-well layouts plus master-mix totals. Styling matches the timeline app’s dark Premiere-like look. Screenshots below are Playwright captures with a mocked backend (single plate, 96 wells filled) so the plate preview stays readable.
 
 Latest captures (Playwright mock):
 
-| Plan & inputs | Plate 1 preview | Plate 2 preview |
-| --- | --- | --- |
-| ![Plan](screenshots/plan_tab.png) | ![Plate 1](screenshots/plate_preview.png) | ![Plate 2](screenshots/plate_preview_plate2.png) |
+| Plan & plate preview |
+| --- |
+| ![Plan](screenshots/plan_tab.png) |
 
 | Output table | Master mix | Notes |
 | --- | --- | --- |
