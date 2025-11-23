@@ -95,6 +95,8 @@ function App() {
     return layout.filter(l => l.Plate === plateFilter)
   }, [layout, plateFilter])
 
+  const hasAnyWells = filteredLayout.length > 0
+
   const schematicCells = useMemo(() => {
     const map = new Map<string, LayoutRow>()
     filteredLayout.forEach(r => map.set(r.Well, r))
@@ -128,6 +130,15 @@ function App() {
     if (!cell) return CONTROL_COLORS.Empty
     if (cell.Type === 'Sample') return genePalette[cell.Gene] || CONTROL_COLORS.Sample
     return CONTROL_COLORS[cell.Type] || CONTROL_COLORS.Sample
+  }
+
+  const getWellColorClass = (cell?: LayoutRow) => {
+    if (!cell) return ''
+    if (cell.Type === 'Standard') return 'bg-sky-500'
+    if (cell.Type === 'Positive') return 'bg-amber-500'
+    if (cell.Type === 'Negative') return 'bg-purple-500'
+    if (cell.Type === 'Blank') return 'bg-slate-700'
+    return ''
   }
 
   const addGene = () => {
@@ -306,38 +317,57 @@ function App() {
                   <span className="muted">{filteredLayout.length ? `${filteredLayout.length} wells shown` : 'Compute to preview'}</span>
                 </div>
                 <div className="plate-shell">
-                  <div className="plate-mini" aria-label="plate schematic">
-                    <div className="corner" />
-                    {PLATE_COLS.map(col => (
-                      <div key={`h-${col}`} className="col-head">{col}</div>
-                    ))}
-                    {PLATE_ROWS.map(row => (
-                      <React.Fragment key={row}>
-                        <div className="row-head">{row}</div>
-                        {PLATE_COLS.map(col => {
-                          const well = `${row}${col}`
-                          const cell = schematicCells.get(well)
-                          return (
-                            <div
-                              key={well}
-                              className={`well-dot ${(cell?.Type || 'Empty').toLowerCase().replace(/[^a-z]/g, '-')}`}
-                              title={
-                                cell
-                                  ? `${well} • ${cell.Gene} (${cell.Type}${cell.Label ? `: ${cell.Label}` : ''})`
-                                  : `${well} • Empty`
-                              }
-                              style={{ backgroundColor: cellColor(cell) }}
-                            >
-                              {cell && (
-                                <span className="well-label">
-                                  {cell.Label ? cell.Label.slice(0, 3) : cell.Gene.slice(0, 3)}
-                                </span>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </React.Fragment>
-                    ))}
+                  <div className="w-full max-w-[540px] mx-auto">
+                    <div
+                      className="plate-mini inline-grid w-full grid-cols-[auto_repeat(24,minmax(0,1fr))] grid-rows-[auto_repeat(17,minmax(0,1fr))] gap-[2px] rounded-2xl bg-slate-950/70 p-3 shadow-inner border border-slate-800/60"
+                      aria-label="plate schematic"
+                    >
+                      <div />
+                      {PLATE_COLS.map(col => (
+                        <div
+                          key={`h-${col}`}
+                          className="text-[10px] leading-none text-slate-200 text-center font-medium [font-variant-numeric:tabular-nums]"
+                        >
+                          {col}
+                        </div>
+                      ))}
+                      {PLATE_ROWS.map((row, rIdx) => (
+                        <React.Fragment key={row}>
+                          <div className="text-[10px] leading-none text-slate-200 flex items-center justify-center font-medium">
+                            {row}
+                          </div>
+                          {PLATE_COLS.map((col, cIdx) => {
+                            const well = `${row}${col}`
+                            const cell = schematicCells.get(well)
+                            const colorClass = getWellColorClass(cell)
+                            const style = cell && cell.Type === 'Sample' ? { backgroundColor: cellColor(cell) } : undefined
+                            return (
+                              <div
+                                key={well}
+                                className={`aspect-square rounded-[3px] border border-slate-800/80 bg-slate-900/60 hover:outline hover:outline-[1px] hover:outline-cyan-300/60 transition-colors ${colorClass}`}
+                                title={
+                                  cell
+                                    ? `${well} • ${cell.Gene} (${cell.Type}${cell.Label ? `: ${cell.Label}` : ''})`
+                                    : `${well} • Empty`
+                                }
+                                style={style}
+                              >
+                                {cell && (
+                                  <span className="text-[9px] font-semibold text-slate-50 leading-none drop-shadow-sm">
+                                    {cell.Label ? cell.Label.slice(0, 3) : cell.Gene.slice(0, 3)}
+                                  </span>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                    {!hasAnyWells && (
+                      <p className="mt-2 text-[11px] text-slate-400 text-center">
+                        No layout yet – fill inputs and click <strong>Compute layout</strong>.
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="legend">
