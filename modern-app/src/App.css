@@ -164,6 +164,25 @@ body {
   max-width: 100%;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 30px rgba(0,0,0,0.25);
 }
+
+/* Support for plate-grid structure used in App.tsx (mirrors plate-mini styling) */
+.plate-grid-wrapper { display: flex; justify-content: center; overflow-x: auto; padding: 6px 0; width: 100%; }
+.plate-grid {
+  --cell: clamp(14px, 2vw, 20px);
+  display: grid;
+  grid-template-columns: 32px repeat(24, var(--cell));
+  grid-template-rows: 28px repeat(16, var(--cell));
+  gap: 2px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid #2d3c57;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(6, 182, 212, 0.06)),
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
+  width: max-content;
+  max-width: 100%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 30px rgba(0,0,0,0.25);
+}
 .corner { width: 32px; height: 28px; }
 .col-head, .row-head { display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; font-size: 11px; color: #e3ebff; font-weight: 700; }
 .row-head { width: 32px; }
@@ -185,6 +204,32 @@ body {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 6px 12px rgba(0,0,0,0.35);
   transform: translateY(-1px);
 }
+
+/* well-square matches well-dot class for plate-grid */
+.well-square {
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 5px;
+  background: #0b1221;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+.well-square:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 6px 12px rgba(0,0,0,0.35);
+  transform: translateY(-1px);
+}
+.well-square.sample { background: #3ecbff; }
+.well-square.standard { background: #22c55e; }
+.well-square.positive { background: #f59e0b; }
+.well-square.negative { background: #a78bfa; }
+.well-square.blank { background: #94a3b8; }
+.well-square.empty { background: #101828; border-color: rgba(255, 255, 255, 0.06); }
 .well-label { font-size: 9px; font-weight: 700; color: #e2e8f0; line-height: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
 .well-dot.sample { background: #3ecbff; }
 .well-dot.standard { background: #22c55e; }
