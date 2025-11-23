@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-  font-family: 'Manrope', 'Helvetica Neue', Arial, sans-serif;
-  color: #0f172a;
-  background: #050910;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #e9edf7;
+  background: #0a0f18;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #050910;
+  background: #0a0f18;
 }
