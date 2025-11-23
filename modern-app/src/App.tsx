@@ -133,11 +133,11 @@ function App() {
   }
 
   const getWellColorClass = (cell?: LayoutRow) => {
-    if (!cell) return ''
-    if (cell.Type === 'Standard') return 'bg-sky-500'
-    if (cell.Type === 'Positive') return 'bg-amber-500'
-    if (cell.Type === 'Negative') return 'bg-purple-500'
-    if (cell.Type === 'Blank') return 'bg-slate-700'
+    if (!cell) return 'well-empty'
+    if (cell.Type === 'Standard') return 'well-standard'
+    if (cell.Type === 'Positive') return 'well-positive'
+    if (cell.Type === 'Negative') return 'well-negative'
+    if (cell.Type === 'Blank') return 'well-blank'
     return ''
   }
 
@@ -317,23 +317,23 @@ function App() {
                   <span className="muted">{filteredLayout.length ? `${filteredLayout.length} wells shown` : 'Compute to preview'}</span>
                 </div>
                 <div className="plate-shell">
-                  <div className="w-full max-w-[540px] mx-auto">
+                  <div className="plate-grid-wrapper">
                     <div
-                      className="plate-mini inline-grid w-full grid-cols-[auto_repeat(24,minmax(0,1fr))] grid-rows-[auto_repeat(17,minmax(0,1fr))] gap-[2px] rounded-2xl bg-slate-950/70 p-3 shadow-inner border border-slate-800/60"
+                      className="plate-grid"
                       aria-label="plate schematic"
                     >
-                      <div />
+                      <div className="corner" />
                       {PLATE_COLS.map(col => (
                         <div
                           key={`h-${col}`}
-                          className="text-[10px] leading-none text-slate-200 text-center font-medium [font-variant-numeric:tabular-nums]"
+                          className="col-head"
                         >
                           {col}
                         </div>
                       ))}
                       {PLATE_ROWS.map((row, rIdx) => (
                         <React.Fragment key={row}>
-                          <div className="text-[10px] leading-none text-slate-200 flex items-center justify-center font-medium">
+                          <div className="row-head">
                             {row}
                           </div>
                           {PLATE_COLS.map((col, cIdx) => {
@@ -344,7 +344,7 @@ function App() {
                             return (
                               <div
                                 key={well}
-                                className={`aspect-square rounded-[3px] border border-slate-800/80 bg-slate-900/60 hover:outline hover:outline-[1px] hover:outline-cyan-300/60 transition-colors ${colorClass}`}
+                                className={`well-square ${colorClass}`}
                                 title={
                                   cell
                                     ? `${well} • ${cell.Gene} (${cell.Type}${cell.Label ? `: ${cell.Label}` : ''})`
@@ -364,7 +364,7 @@ function App() {
                       ))}
                     </div>
                     {!hasAnyWells && (
-                      <p className="mt-2 text-[11px] text-slate-400 text-center">
+                      <p className="plate-empty-hint">
                         No layout yet – fill inputs and click <strong>Compute layout</strong>.
                       </p>
                     )}
@@ -491,7 +491,7 @@ function App() {
           {layout.length > 0 && (
             <div className="table-wrap">
               <div className="table-scroll">
-                <table className="data">
+                <table className="data layout-table">
                   <thead>
                     <tr>
                       {['Plate','Well','Gene','Type','Label','Replicate','Group'].map(h => <th key={h}>{h}</th>)}
@@ -528,7 +528,7 @@ function App() {
           {mix.length > 0 && (
             <div className="table-wrap">
               <div className="table-scroll">
-                <table className="data">
+                <table className="data mix-table">
                   <thead>
                     <tr>
                       {MIX_HEADERS.map(h => (
