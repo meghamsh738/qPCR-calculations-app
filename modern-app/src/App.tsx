@@ -327,7 +327,13 @@ function App() {
                                   : `${well} • Empty`
                               }
                               style={{ backgroundColor: cellColor(cell) }}
-                            />
+                            >
+                              {cell && (
+                                <span className="well-label">
+                                  {cell.Label ? cell.Label.slice(0, 3) : cell.Gene.slice(0, 3)}
+                                </span>
+                              )}
+                            </div>
                           )
                         })}
                       </React.Fragment>
