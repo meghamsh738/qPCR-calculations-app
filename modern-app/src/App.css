@@ -148,22 +148,53 @@ body {
 .plate-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; }
 
 .plate-shell { width: 100%; display: flex; justify-content: center; overflow-x: auto; padding: 6px 0; }
-.plate-mini { --cell: clamp(14px, 2vw, 20px); display: grid; grid-template-columns: 32px repeat(24, var(--cell)); grid-template-rows: 28px repeat(16, var(--cell)); gap: 2px; padding: 12px; border-radius: 14px; border: 1px solid #24324c; background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); width: max-content; max-width: 100%; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+.plate-mini {
+  --cell: clamp(14px, 2vw, 20px);
+  display: grid;
+  grid-template-columns: 32px repeat(24, var(--cell));
+  grid-template-rows: 28px repeat(16, var(--cell));
+  gap: 2px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid #2d3c57;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(6, 182, 212, 0.06)),
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
+  width: max-content;
+  max-width: 100%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 30px rgba(0,0,0,0.25);
+}
 .corner { width: 32px; height: 28px; }
 .col-head, .row-head { display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; font-size: 11px; color: #e3ebff; font-weight: 700; }
 .row-head { width: 32px; }
-.well-dot { width: var(--cell); height: var(--cell); border-radius: 4px; background: #0b1221; border: 1px solid rgba(255, 255, 255, 0.06); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-.well-dot:hover { border-color: rgba(255, 255, 255, 0.2); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); }
+.well-dot {
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 5px;
+  background: #0b1221;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+.well-dot:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18), 0 6px 12px rgba(0,0,0,0.35);
+  transform: translateY(-1px);
+}
 .well-label { font-size: 9px; font-weight: 700; color: #e2e8f0; line-height: 1; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
 .well-dot.sample { background: #3ecbff; }
 .well-dot.standard { background: #22c55e; }
 .well-dot.positive { background: #f59e0b; }
 .well-dot.negative { background: #a78bfa; }
 .well-dot.blank { background: #94a3b8; }
-.well-dot.empty { background: #0b1221; border-color: rgba(255, 255, 255, 0.03); }
+.well-dot.empty { background: #101828; border-color: rgba(255, 255, 255, 0.06); }
 
 .legend { display: flex; gap: 12px; flex-wrap: wrap; color: #cdd6f4; font-size: 13px; }
-.swatch { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 3px; vertical-align: middle; }
+.swatch { display: inline-block; width: 14px; height: 14px; margin-right: 6px; border-radius: 4px; vertical-align: middle; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 .swatch.sample { background: #3ecbff; }
 .swatch.standard { background: #22c55e; }
 .swatch.positive { background: #f59e0b; }

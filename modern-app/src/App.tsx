@@ -89,6 +89,11 @@ function App() {
   }, [summary, plateFilter])
 
   const plates = useMemo(() => Array.from(new Set(layout.map(l => l.Plate))), [layout])
+  const plateSummary = useMemo(() => {
+    const chosen = summary.find(s => s.plate === plateFilter)
+    if (chosen) return chosen
+    return summary[0]
+  }, [summary, plateFilter])
 
   const filteredLayout = useMemo(() => {
     if (!plateFilter) return layout
@@ -314,7 +319,13 @@ function App() {
               <div className="mini-plate">
                 <div className="plate-head">
                   <span>Plate preview ({plateFilter || plates[0] || 'Plate 1'})</span>
-                  <span className="muted">{filteredLayout.length ? `${filteredLayout.length} wells shown` : 'Compute to preview'}</span>
+                  <span className="muted">
+                    {plateSummary
+                      ? `${plateSummary.used} used · ${plateSummary.empty} empty`
+                      : filteredLayout.length
+                        ? `${filteredLayout.length} wells shown`
+                        : 'Compute to preview'}
+                  </span>
                 </div>
                 <div className="plate-shell">
                   <div className="plate-grid-wrapper">
@@ -331,12 +342,12 @@ function App() {
                           {col}
                         </div>
                       ))}
-                      {PLATE_ROWS.map((row, rIdx) => (
+                      {PLATE_ROWS.map((row) => (
                         <React.Fragment key={row}>
                           <div className="row-head">
                             {row}
                           </div>
-                          {PLATE_COLS.map((col, cIdx) => {
+                          {PLATE_COLS.map((col) => {
                             const well = `${row}${col}`
                             const cell = schematicCells.get(well)
                             const colorClass = getWellColorClass(cell)
