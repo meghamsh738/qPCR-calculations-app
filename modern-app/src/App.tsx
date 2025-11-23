@@ -80,7 +80,6 @@ function App() {
   const [plateFilter, setPlateFilter] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [previewTab, setPreviewTab] = useState<'overview' | 'plate'>('overview')
 
   useEffect(() => {
     if (!plateFilter && summary.length) {
@@ -299,99 +298,6 @@ function App() {
             <p className="help">Format: Name[tab/comma/space]Group (Group optional). Order is preserved.</p>
           </div>
 
-          <div className="preview wide">
-            <div className="side-head">
-              <p className="kicker">Example</p>
-              <span className="pill ghost">{usePasted ? 'Pasted list' : '# count only'}</span>
-            </div>
-            <div className="tab-buttons compact">
-              <button className={previewTab === 'overview' ? 'tab active' : 'tab'} onClick={() => setPreviewTab('overview')}>Overview</button>
-              <button className={previewTab === 'plate' ? 'tab active' : 'tab'} onClick={() => setPreviewTab('plate')}>Plate preview</button>
-            </div>
-            {previewTab === 'overview' && (
-              <ul className="bullets">
-                <li>Replicates are adjacent left→right in the same row.</li>
-                <li>Genes never split across plates; overflow moves the gene to the next plate automatically.</li>
-                <li>Order within a gene: Samples → Standards → Pos (if any) → RT− → RNA− → Blank.</li>
-              </ul>
-            )}
-            {previewTab === 'plate' && (
-              <div className="mini-plate">
-                <div className="plate-head">
-                  <span>Plate preview ({plateFilter || plates[0] || 'Plate 1'})</span>
-                  <span className="muted">
-                    {plateSummary
-                      ? `${plateSummary.used} used · ${plateSummary.empty} empty`
-                      : filteredLayout.length
-                        ? `${filteredLayout.length} wells shown`
-                        : 'Compute to preview'}
-                  </span>
-                </div>
-                <div className="plate-shell">
-                  <div className="plate-grid-wrapper">
-                    <div
-                      className="plate-grid"
-                      aria-label="plate schematic"
-                    >
-                      <div className="corner" />
-                      {PLATE_COLS.map(col => (
-                        <div
-                          key={`h-${col}`}
-                          className="col-head"
-                        >
-                          {col}
-                        </div>
-                      ))}
-                      {PLATE_ROWS.map((row) => (
-                        <React.Fragment key={row}>
-                          <div className="row-head">
-                            {row}
-                          </div>
-                          {PLATE_COLS.map((col) => {
-                            const well = `${row}${col}`
-                            const cell = schematicCells.get(well)
-                            const colorClass = getWellColorClass(cell)
-                            const style = cell && cell.Type === 'Sample' ? { backgroundColor: cellColor(cell) } : undefined
-                            return (
-                              <div
-                                key={well}
-                                className={`well-square ${colorClass}`}
-                                title={
-                                  cell
-                                    ? `${well} • ${cell.Gene} (${cell.Type}${cell.Label ? `: ${cell.Label}` : ''})`
-                                    : `${well} • Empty`
-                                }
-                                style={style}
-                              >
-                                {cell && (
-                                  <span className="well-label">
-                                    {cell.Label ? cell.Label.slice(0, 4) : cell.Gene.slice(0, 4)}
-                                  </span>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                    {!hasAnyWells && (
-                      <p className="plate-empty-hint">
-                        No layout yet – fill inputs and click <strong>Compute layout</strong>.
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="legend">
-                  <span><span className="swatch sample" /> Sample (per-gene color)</span>
-                  <span><span className="swatch standard" /> Standard</span>
-                  <span><span className="swatch positive" /> Positive</span>
-                  <span><span className="swatch negative" /> RT− / RNA−</span>
-                  <span><span className="swatch blank" /> Blank</span>
-                  <span><span className="swatch empty" /> Empty</span>
-                </div>
-              </div>
-            )}
-          </div>
         </section>
 
         <section className="card">
@@ -467,6 +373,93 @@ function App() {
             <button className="primary" onClick={handleCalculate} disabled={loading} data-testid="calculate-btn">
               {loading ? 'Planning…' : 'Compute layout'}
             </button>
+          </div>
+        </section>
+      </div>
+
+      <div className="shell">
+        <section className="card plate-preview-card">
+          <div className="section-head">
+            <div>
+              <p className="kicker">Preview</p>
+              <h2>Plate layout (computed)</h2>
+              <p className="muted">Full-width schematic using current inputs.</p>
+            </div>
+            <div className="muted">
+              {plateSummary
+                ? `${plateSummary.used} used · ${plateSummary.empty} empty`
+                : filteredLayout.length
+                  ? `${filteredLayout.length} wells shown`
+                  : 'Compute to preview'}
+            </div>
+          </div>
+
+          <div className="mini-plate">
+            <div className="plate-head">
+              <span>Plate preview ({plateFilter || plates[0] || 'Plate 1'})</span>
+            </div>
+            <div className="plate-shell">
+              <div className="plate-grid-wrapper">
+                <div
+                  className="plate-grid"
+                  aria-label="plate schematic"
+                >
+                  <div className="corner" />
+                  {PLATE_COLS.map(col => (
+                    <div
+                      key={`h-${col}`}
+                      className="col-head"
+                    >
+                      {col}
+                    </div>
+                  ))}
+                  {PLATE_ROWS.map((row) => (
+                    <React.Fragment key={row}>
+                      <div className="row-head">
+                        {row}
+                      </div>
+                      {PLATE_COLS.map((col) => {
+                        const well = `${row}${col}`
+                        const cell = schematicCells.get(well)
+                        const colorClass = getWellColorClass(cell)
+                        const style = cell && cell.Type === 'Sample' ? { backgroundColor: cellColor(cell) } : undefined
+                        return (
+                          <div
+                            key={well}
+                            className={`well-square ${colorClass}`}
+                            title={
+                              cell
+                                ? `${well} • ${cell.Gene} (${cell.Type}${cell.Label ? `: ${cell.Label}` : ''})`
+                                : `${well} • Empty`
+                            }
+                            style={style}
+                          >
+                            {cell && (
+                              <span className="well-label">
+                                {cell.Label ? cell.Label.slice(0, 4) : cell.Gene.slice(0, 4)}
+                              </span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </React.Fragment>
+                  ))}
+                </div>
+                {!hasAnyWells && (
+                  <p className="plate-empty-hint">
+                    No layout yet – fill inputs and click <strong>Compute layout</strong>.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="legend">
+              <span><span className="swatch sample" /> Sample (per-gene color)</span>
+              <span><span className="swatch standard" /> Standard</span>
+              <span><span className="swatch positive" /> Positive</span>
+              <span><span className="swatch negative" /> RT− / RNA−</span>
+              <span><span className="swatch blank" /> Blank</span>
+              <span><span className="swatch empty" /> Empty</span>
+            </div>
           </div>
         </section>
       </div>
