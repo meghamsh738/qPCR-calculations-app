@@ -17,13 +17,13 @@ test('qPCR planner flow', async ({ page }) => {
   await page.screenshot({ path: 'screenshots/plan_view.png', fullPage: true })
   const cards = page.locator('section.card')
   await cards.nth(0).screenshot({ path: 'screenshots/plan_tab.png' })
-  await page.getByRole('button', { name: 'Plate preview' }).click()
+  // Plate preview is always visible under the preview card; no tab click needed.
   await page.locator('.plate-grid').screenshot({ path: 'screenshots/plate_preview.png' })
 
   await page.getByTestId('calculate-btn').click()
   // Confirm plan finished and spans multiple plates
   await expect(page.getByRole('cell', { name: 'Plate 1' }).first()).toBeVisible()
-  const plateSelect = cards.nth(2).locator('select')
+  const plateSelect = cards.nth(3).locator('select')
   await expect(plateSelect).toBeVisible()
   await plateSelect.selectOption({ label: 'Plate 2' })
   await expect(page.getByRole('cell', { name: 'Plate 2' }).first()).toBeVisible()

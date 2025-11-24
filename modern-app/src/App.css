@@ -91,6 +91,7 @@ body {
 
 .kicker { text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; margin: 0; color: #7c8db1; }
 .muted { color: #9fb0cc; margin: 0; line-height: 1.5; }
+.muted-small { color: #9fb0cc; font-size: 12px; }
 
 .shell { width: 100%; margin: 0 auto; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
@@ -167,11 +168,20 @@ body {
 }
 
 /* Support for plate-grid structure used in App.tsx (mirrors plate-mini styling) */
-.plate-grid-wrapper { display: flex; justify-content: flex-start; overflow: auto; padding: 18px 0; width: 100%; max-height: 720px; }
+.plate-grid-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  overflow: auto;
+  padding: 16px 0;
+  width: 100%;
+  max-height: 720px;
+}
 .plate-grid {
+  --well-size: min(32px, calc((100% - 46px - 25 * 2px) / 24));
+
   display: grid;
-  grid-template-columns: 46px repeat(24, minmax(30px, 1fr));
-  grid-template-rows: 40px repeat(16, minmax(30px, 1fr));
+  grid-template-columns: 46px repeat(24, minmax(var(--well-size), 1fr));
+  grid-template-rows: 40px repeat(16, minmax(var(--well-size), auto));
   gap: 2px;
   padding: 14px;
   border-radius: 16px;
@@ -185,8 +195,8 @@ body {
 }
 .corner { width: 46px; height: 40px; position: sticky; top: 0; left: 0; z-index: 5; background: #0f172a; }
 .col-head, .row-head { display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; font-size: 15px; color: #f7faff; font-weight: 900; }
-.row-head { width: 46px; position: sticky; left: 0; z-index: 4; background: #0f172a; }
-.col-head { position: sticky; top: 0; z-index: 3; background: #0f172a; }
+.row-head { width: 46px; position: sticky; left: 0; z-index: 4; background: #0f172a; border-right: 1px solid rgba(15, 23, 42, 0.9); }
+.col-head { position: sticky; top: 0; z-index: 3; background: #0f172a; border-bottom: 1px solid rgba(15, 23, 42, 0.9); }
 .well-dot {
   width: var(--cell);
   height: var(--cell);
@@ -225,12 +235,14 @@ body {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 8px 14px rgba(0,0,0,0.38);
   transform: translateY(-1px);
 }
-.well-square.sample { background: #3ecbff; }
-.well-square.standard { background: #22c55e; }
-.well-square.positive { background: #f59e0b; }
-.well-square.negative { background: #a78bfa; }
-.well-square.blank { background: #94a3b8; }
-.well-square.empty { background: #101828; border-color: rgba(255, 255, 255, 0.06); }
+.well-square:hover::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
 .well-label { font-size: 14px; font-weight: 900; color: #ffffff; line-height: 1; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9); letter-spacing: 0.01em; }
 .well-dot.sample { background: #3ecbff; }
 .well-dot.standard { background: #22c55e; }

@@ -130,19 +130,10 @@ function App() {
     return palette
   }, [layout])
 
-  const cellColor = (cell?: LayoutRow) => {
+  const cellColor = (cell?: LayoutRow | null) => {
     if (!cell) return CONTROL_COLORS.Empty
     if (cell.Type === 'Sample') return genePalette[cell.Gene] || CONTROL_COLORS.Sample
     return CONTROL_COLORS[cell.Type] || CONTROL_COLORS.Sample
-  }
-
-  const getWellColorClass = (cell?: LayoutRow) => {
-    if (!cell) return 'well-empty'
-    if (cell.Type === 'Standard') return 'well-standard'
-    if (cell.Type === 'Positive') return 'well-positive'
-    if (cell.Type === 'Negative') return 'well-negative'
-    if (cell.Type === 'Blank') return 'well-blank'
-    return ''
   }
 
   const addGene = () => {
@@ -397,6 +388,9 @@ function App() {
           <div className="mini-plate">
             <div className="plate-head">
               <span>Plate preview ({plateFilter || plates[0] || 'Plate 1'})</span>
+              {plateSummary && (
+                <span className="muted-small">{plateSummary.used}/384 used</span>
+              )}
             </div>
             <div className="plate-shell">
               <div className="plate-grid-wrapper">
@@ -421,18 +415,17 @@ function App() {
                       {PLATE_COLS.map((col) => {
                         const well = `${row}${col}`
                         const cell = schematicCells.get(well)
-                        const colorClass = getWellColorClass(cell)
-                        const style = cell && cell.Type === 'Sample' ? { backgroundColor: cellColor(cell) } : undefined
+                        const bg = cellColor(cell)
                         return (
                           <div
                             key={well}
-                            className={`well-square ${colorClass}`}
+                            className="well-square"
                             title={
                               cell
                                 ? `${well} • ${cell.Gene} (${cell.Type}${cell.Label ? `: ${cell.Label}` : ''})`
                                 : `${well} • Empty`
                             }
-                            style={style}
+                            style={{ backgroundColor: bg }}
                           >
                             {cell && (
                               <span className="well-label">
