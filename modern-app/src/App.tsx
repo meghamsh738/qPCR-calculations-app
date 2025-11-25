@@ -27,6 +27,7 @@ type LayoutRow = {
   Label: string
   Replicate: number
   Group?: string
+   Extras?: string[]
 }
 
 type MixRow = {
@@ -49,6 +50,7 @@ type PlanResponse = {
   mix: MixRow[]
   summary: SummaryRow[]
   inputs: any
+  sample_headers?: string[]
 }
 
 const DEFAULT_GENES: GeneEntry[] = [
@@ -77,6 +79,7 @@ function App() {
   const [layout, setLayout] = useState<LayoutRow[]>([])
   const [mix, setMix] = useState<MixRow[]>([])
   const [summary, setSummary] = useState<SummaryRow[]>([])
+  const [sampleHeaders, setSampleHeaders] = useState<string[]>([])
   const [plateFilter, setPlateFilter] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -191,6 +194,7 @@ function App() {
       setLayout(data.layout)
       setMix(data.mix)
       setSummary(data.summary)
+      setSampleHeaders(data.sample_headers || [])
       if (data.summary.length) setPlateFilter(data.summary[0].plate)
     } catch (err: any) {
       setError(err.message || 'Failed to plan layout')
@@ -201,10 +205,20 @@ function App() {
 
   const copyTSV = () => {
     if (!layout.length) return
-    const headers = ['Plate', 'Well', 'Gene', 'Type', 'Label', 'Replicate', 'Group']
+    const headers = ['Well', 'Gene', 'Type', 'Label', ...sampleHeaders, 'Replicate', 'Plate']
     const lines = [headers.join('\t')]
     layout.forEach(r => {
-      lines.push(headers.map(h => (r as any)[h] ?? '').join('\t'))
+      const extras = sampleHeaders.map((_, idx) => r.Extras?.[idx] ?? '')
+      const row = [
+        r.Well,
+        r.Gene,
+        r.Type,
+        r.Label,
+        ...extras,
+        r.Replicate,
+        r.Plate
+      ]
+      lines.push(row.join('\t'))
     })
     navigator.clipboard.writeText(lines.join('\n'))
     alert('Layout copied to clipboard (TSV).')
@@ -253,7 +267,7 @@ function App() {
             <div>
               <p className="kicker">Step 1 · Samples</p>
               <h2>Paste list or use count</h2>
-              <p className="muted">Headerless list, one per line. Optional group after space/comma/tab.</p>
+              <p className="muted">Headerless list, one per line. Multiple columns ok (tab/comma/space) — first is label, rest show in output.</p>
             </div>
           </div>
 
@@ -286,7 +300,7 @@ function App() {
                 </label>
               </div>
             )}
-            <p className="help">Format: Name[tab/comma/space]Group (Group optional). Order is preserved.</p>
+            <p className="help">Format: label [col2] [col3] … (col2 becomes Group if it is the only extra column).</p>
           </div>
 
         </section>
@@ -491,7 +505,7 @@ function App() {
                 <table className="data layout-table">
                   <thead>
                     <tr>
-                      {['Well','Gene','Type','Label','Replicate','Group','Plate'].map(h => <th key={h}>{h}</th>)}
+                      {['Well','Gene','Type','Label', ...sampleHeaders, 'Replicate','Plate'].map(h => <th key={h}>{h}</th>)}
                     </tr>
                   </thead>
                   <tbody>
@@ -504,8 +518,10 @@ function App() {
                           {row.Type}
                         </td>
                         <td>{row.Label}</td>
+                        {sampleHeaders.map((h, hIdx) => (
+                          <td key={`${idx}-${h}`}>{row.Extras?.[hIdx] ?? ''}</td>
+                        ))}
                         <td className="num">{row.Replicate}</td>
-                        <td>{row.Group || ''}</td>
                         <td className="plate-cell">{row.Plate}</td>
                       </tr>
                     ))}
