@@ -45,3 +45,29 @@ test('qPCR planner flow', async ({ page }) => {
   await notesCard.screenshot({ path: 'screenshots/notes_card.png' })
   await notesCard.screenshot({ path: 'screenshots/notes_tab.png' })
 })
+
+test('pasted samples keep extra columns in output table', async ({ page }) => {
+  await page.goto('/')
+  await page.getByText('qPCR plate plans without guesswork').waitFor({ timeout: 60000 })
+
+  const textarea = page.locator('textarea').first()
+  await textarea.waitFor({ state: 'visible', timeout: 30000 })
+
+  const sampleBlock = [
+    '321\tMale\ttnf\told age',
+    'C577\tMale\tsaline\tmiddle age',
+    'C5711\tFemale\tsaline\tmiddle age'
+  ].join('\n')
+
+  await textarea.fill(sampleBlock)
+  await page.getByTestId('calculate-btn').click()
+
+  await expect(page.getByRole('cell', { name: 'Plate 1' }).first()).toBeVisible({ timeout: 10000 })
+  await expect(page.getByRole('cell', { name: 'Extra 1' })).toBeVisible()
+  await expect(page.getByRole('cell', { name: 'Extra 3' })).toBeVisible()
+
+  // The first sample row should surface the extra fields in order.
+  await expect(page.getByRole('cell', { name: 'Male' }).first()).toBeVisible()
+  await expect(page.getByRole('cell', { name: 'tnf' }).first()).toBeVisible()
+  await expect(page.getByRole('cell', { name: 'old age' }).first()).toBeVisible()
+})

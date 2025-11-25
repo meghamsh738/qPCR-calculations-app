@@ -17,6 +17,7 @@ Run-through video:
 - Genes never split across plates; overflow moves the gene to the next plate. Optional per-gene plate overrides.
 - Controls: standards, positives, RT−, RNA−, blanks; adjustable mix overage for master-mix only.
 - Outputs: interactive table, TSV copy, CSV/Excel export hooks, per-gene master-mix volumes.
+- Paste samples with multiple columns (tab/comma/space). First token is the label; all remaining columns render in the output table.
 
 ## Setup (D:)
 ```bash

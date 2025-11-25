@@ -81,23 +81,83 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def parse_samples(lines: List[str]) -> Tuple[List[str], Dict[str, str]]:
-    """Parse pasted sample lines -> (ordered names, name->group)."""
+COMPACT_SAMPLE_RE = re.compile(
+    r"^(?P<label>[A-Za-z0-9]+)"
+    r"(?P<sex>male|female)"
+    r"(?P<treatment>tnf|saline)"
+    r"(?P<age>middleage|oldage)$",
+    re.IGNORECASE,
+)
+
+
+def _split_sample_line(raw: str) -> List[str]:
+    """Return tokens for a sample line.
+
+    Priority:
+    1) Tabs or commas keep intra-value spaces intact.
+    2) Compact patterns like 321Maletnfold age are unpacked via regex.
+    3) Fallback: whitespace split, with "old age"/"middle age" re-joined.
+    """
+
+    line = raw.strip()
+    if not line or line.startswith("#"):
+        return []
+
+    if "\t" in line or "," in line:
+        return [p.strip() for p in re.split(r"[\t,]+", line) if p.strip()]
+
+    # Compact case: remove internal spaces so "tnfold age" still matches.
+    compact = re.sub(r"\s+", "", line)
+    m = COMPACT_SAMPLE_RE.match(compact)
+    if m:
+        age_key = m.group("age").lower()
+        age = "middle age" if "middle" in age_key else "old age"
+        return [
+            m.group("label"),
+            m.group("sex").capitalize(),
+            m.group("treatment").lower(),
+            age,
+        ]
+
+    parts = [p for p in re.split(r"\s+", line) if p]
+    if len(parts) >= 2 and parts[-2].lower() in {"old", "middle"} and parts[-1].lower() == "age":
+        parts = parts[:-2] + [f"{parts[-2]} {parts[-1]}"]
+    return parts
+
+
+def parse_samples(lines: List[str]) -> Tuple[List[str], Dict[str, str], Dict[str, List[str]], List[str]]:
+    """Parse pasted sample lines ->
+    (ordered names, name->group, name->extras[], headers_for_extras).
+
+    - First token is always treated as the sample label.
+    - Extras are every remaining token, preserving order.
+    - If only one extra column exists, it keeps the legacy name "Group".
+    """
+
     names: List[str] = []
-    mapping: Dict[str, str] = {}
+    group_map: Dict[str, str] = {}
+    extras_map: Dict[str, List[str]] = {}
+    max_extras = 0
+
     for ln in lines:
-        ln = ln.strip()
-        if not ln or ln.startswith("#"):
-            continue
-        parts = [p for p in re.split(r"[\t, ]+", ln) if p]
+        parts = _split_sample_line(ln)
         if not parts:
             continue
-        name = parts[0]
-        group = parts[1] if len(parts) > 1 else ""
-        if name not in mapping:
-            mapping[name] = group
-            names.append(name)
-    return names, mapping
+        label, *extras = parts
+        if label in extras_map:
+            continue  # preserve first occurrence order
+        names.append(label)
+        extras_map[label] = extras
+        if extras:
+            group_map[label] = extras[0]
+        max_extras = max(max_extras, len(extras))
+
+    if max_extras == 1:
+        headers = ["Group"]
+    else:
+        headers = [f"Extra {i}" for i in range(1, max_extras + 1)]
+
+    return names, group_map, extras_map, headers
 
 @app.post("/plan")
 async def plan(req: PlanRequest):
@@ -108,12 +168,16 @@ async def plan(req: PlanRequest):
         raise HTTPException(status_code=400, detail="Replicates too large for 24 columns.")
 
     if req.use_pasted_samples:
-        samples, sample_group_map = parse_samples(req.pasted_samples)
+        samples, sample_group_map, sample_extra_map, sample_headers = parse_samples(req.pasted_samples)
         if not samples:
             raise HTTPException(status_code=400, detail="No samples parsed from pasted list.")
     else:
         samples = [f"S{i}" for i in range(1, req.num_samples + 1)]
         sample_group_map = {}
+        sample_extra_map = {}
+        sample_headers: List[str] = []
+
+    max_extras = len(sample_headers)
 
     if not req.genes:
         raise HTTPException(status_code=400, detail="At least one gene is required.")
@@ -194,6 +258,9 @@ async def plan(req: PlanRequest):
                         row_idx += 1
                     if row_idx >= len(PLATE_ROWS):
                         raise HTTPException(status_code=400, detail="Plate overflow while placing wells.")
+                    extras = sample_extra_map.get(lab, []) if label_type == "Sample" else []
+                    if len(extras) < max_extras:
+                        extras = extras + [""] * (max_extras - len(extras))
                     for r in range(req.replicates):
                         well = f"{PLATE_ROWS[row_idx]}{PLATE_COLS[col_idx + r]}"
                         record = {
@@ -206,6 +273,7 @@ async def plan(req: PlanRequest):
                         }
                         if label_type == "Sample":
                             record["Group"] = sample_group_map.get(lab, "")
+                            record["Extras"] = extras
                         all_layout.append(record)
                         plates_dict[current_plate].append(record)
                         placed_for_gene += 1
@@ -246,6 +314,7 @@ async def plan(req: PlanRequest):
         "mix": all_mix,
         "plates": plates_dict,
         "summary": summary,
+        "sample_headers": sample_headers,
         "inputs": req.dict(),
     }
 
