@@ -301,6 +301,21 @@ function App() {
               </div>
             )}
             <p className="help">Format: label [col2] [col3] … (col2 becomes Group if it is the only extra column).</p>
+            <div className="helper">
+              <div className="helper-head">
+                <div>
+                  <p className="kicker">Need to reformat your list?</p>
+                  <h3>AI prompt for clean sample labels</h3>
+                  <p className="muted">Open a chat, paste this, get back a one-per-line list, then paste it above.</p>
+                </div>
+                <div className="helper-links">
+                  <a href="https://chat.openai.com/" target="_blank" rel="noreferrer">ChatGPT</a>
+                  <a href="https://gemini.google.com/app" target="_blank" rel="noreferrer">Gemini</a>
+                  <a href="https://grok.com/" target="_blank" rel="noreferrer">Grok</a>
+                </div>
+              </div>
+              <pre className="prompt-block">Convert my table to a plain list of sample labels, one per line, no header. Trim whitespace, keep order, no invented rows. Output text only.</pre>
+            </div>
           </div>
 
         </section>
