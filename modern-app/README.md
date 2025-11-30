@@ -34,6 +34,12 @@ npm run dev:full   # front :5176, API :8003
 ```
 Open http://localhost:5176 and click **Compute layout** (or mock `/plan` if you just want UI).
 
+## Data format & quick AI helper
+- Simplest input: two-column CSV/TSV with headers `Sample, Conc` (ng/µL). The app also accepts wider tables; the first token per row becomes the label.
+- To standardize quickly, use: [ChatGPT](https://chat.openai.com/), [Gemini](https://gemini.google.com/app), [Grok](https://grok.com/).
+- Prompt: "Convert my table to CSV with headers: Sample, Conc. Keep values intact, no invented data, output UTF-8 CSV text only."
+- Save as `samples.csv` and paste or upload. Visual helper: `screenshots/data-format-helper.svg`.
+
 ## Tests & screenshots
 ```bash
 npx playwright install chromium   # once
