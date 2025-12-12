@@ -12,6 +12,8 @@ Run-through video:
 
 <video src="screenshots/example_run.webm" controls width="820"></video>
 
+Extra captures (full-page + closeups): `screenshots/example_run.png`, `screenshots/layout_full.png`, `screenshots/plan_view.png`, `screenshots/plate_preview.png`.
+
 ## Highlights
 - 384-well 16×24 grid; replicates stay adjacent in-row.
 - Genes never split across plates; overflow moves the gene to the next plate. Optional per-gene plate overrides.
