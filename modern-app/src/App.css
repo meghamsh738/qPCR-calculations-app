@@ -27,8 +27,9 @@
   margin: 0;
   font-size: 24px;
   line-height: 1.25;
-  letter-spacing: -0.01em;
-  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .hero .tag {
@@ -38,6 +39,9 @@
   font-size: 14px;
   color: var(--text-2);
   margin-bottom: var(--s-2);
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }
 
 .lede {
@@ -63,9 +67,12 @@
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--text-2);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 12px;
   line-height: 1;
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }
 
 .pill.ghost {
@@ -116,14 +123,18 @@
   margin-top: var(--s-1);
   color: var(--text);
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
 }
 
 .kicker {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-2);
   margin: 0;
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }
 
 .muted {
@@ -168,8 +179,9 @@
   margin: 0;
   font-size: 20px;
   line-height: 1.35;
-  letter-spacing: -0.01em;
-  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .tabs {
