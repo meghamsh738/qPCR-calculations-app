@@ -49,7 +49,7 @@ type PlanResponse = {
   layout: LayoutRow[]
   mix: MixRow[]
   summary: SummaryRow[]
-  inputs: any
+  inputs: Record<string, unknown>
   sample_headers?: string[]
 }
 
@@ -196,8 +196,9 @@ function App() {
       setSummary(data.summary)
       setSampleHeaders(data.sample_headers || [])
       if (data.summary.length) setPlateFilter(data.summary[0].plate)
-    } catch (err: any) {
-      setError(err.message || 'Failed to plan layout')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to plan layout'
+      setError(message)
     } finally {
       setLoading(false)
     }

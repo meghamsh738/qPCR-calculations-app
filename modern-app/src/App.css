@@ -895,3 +895,67 @@
   background: var(--border-2);
   border-radius: 999px;
 }
+
+.page {
+  background: radial-gradient(circle at 10% 10%, rgba(47, 106, 246, 0.12), transparent 45%),
+    radial-gradient(circle at 90% 0%, rgba(18, 183, 106, 0.12), transparent 40%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f8 100%);
+  padding: var(--space-5) 0 calc(var(--space-5) * 2);
+}
+
+.hero,
+.card {
+  background: var(--panel);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+}
+
+.hero-meta,
+.meta-card {
+  background: var(--surface-2);
+}
+
+.tab {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.tab.active {
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+}
+
+.primary {
+  border: 1px solid var(--accent-strong);
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.ghost {
+  border: 1px dashed var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.textarea {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+}
+
+.table-wrap {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
