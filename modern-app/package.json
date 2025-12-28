@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node ./node_modules/vite/bin/vite.js --host --port 5176",
     "dev:front": "node ./node_modules/vite/bin/vite.js --host --port 5176",
-    "dev:back": "./.venv/bin/python -m uvicorn backend.main:app --reload --port 8003",
+    "dev:back": "/home/megha/.venvs/lab-backend/bin/python -m uvicorn backend.main:app --reload --port 8003",
     "dev:full": "node ./node_modules/concurrently/dist/bin/concurrently.js -k -s first -n front,api \"npm:dev:front\" \"npm:dev:back\"",
     "build": "node ./node_modules/typescript/bin/tsc -b && node ./node_modules/vite/bin/vite.js build",
     "lint": "eslint .",

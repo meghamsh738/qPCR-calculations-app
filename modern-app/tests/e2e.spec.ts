@@ -1,11 +1,9 @@
 import { test, expect } from '@playwright/test'
-import { promises as fs } from 'fs'
 
 test('qPCR planner flow', async ({ page }) => {
   await page.goto('/')
+  await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; }' })
   await page.getByText('qPCR plate plans without guesswork').waitFor({ timeout: 60000 })
-
-  await fs.mkdir('screenshots', { recursive: true })
 
   // Use a long pasted list so the run spans at least two plates
   const samples = Array.from({ length: 80 }, (_, i) => `Sample${i + 1}`).join('\n')
@@ -14,11 +12,11 @@ test('qPCR planner flow', async ({ page }) => {
   await textarea.fill(samples)
 
   // Initial plan view (before compute) + plan card
-  await page.screenshot({ path: 'screenshots/plan_view.png', fullPage: true })
+  await expect(page).toHaveScreenshot('plan_view.png', { fullPage: true })
   const cards = page.locator('section.card')
-  await cards.nth(0).screenshot({ path: 'screenshots/plan_tab.png' })
+  await expect(cards.nth(0)).toHaveScreenshot('plan_tab.png')
   // Plate preview is always visible under the preview card; no tab click needed.
-  await page.locator('.plate-grid').screenshot({ path: 'screenshots/plate_preview.png' })
+  await expect(page.locator('.plate-grid')).toHaveScreenshot('plate_preview.png')
 
   await page.getByTestId('calculate-btn').click()
   // Confirm plan finished and spans multiple plates
@@ -29,25 +27,26 @@ test('qPCR planner flow', async ({ page }) => {
   await expect(page.getByRole('cell', { name: 'Plate 2' }).first()).toBeVisible()
 
   // Full page after compute (layout + mix)
-  await page.screenshot({ path: 'screenshots/layout_full.png', fullPage: true })
-  await page.screenshot({ path: 'screenshots/example_run.png', fullPage: true })
+  await expect(page).toHaveScreenshot('layout_full.png', { fullPage: true })
+  await expect(page).toHaveScreenshot('example_run.png', { fullPage: true })
 
   // Layout/output card
-  await cards.nth(2).screenshot({ path: 'screenshots/output_tab.png' })
+  await expect(cards.nth(2)).toHaveScreenshot('output_tab.png')
 
   // Master mix card
   const masterCard = cards.nth(3)
-  await masterCard.screenshot({ path: 'screenshots/master_mix.png' })
-  await masterCard.screenshot({ path: 'screenshots/master_tab.png' })
+  await expect(masterCard).toHaveScreenshot('master_mix.png')
+  await expect(masterCard).toHaveScreenshot('master_tab.png')
 
   // Notes card
   const notesCard = cards.nth(4)
-  await notesCard.screenshot({ path: 'screenshots/notes_card.png' })
-  await notesCard.screenshot({ path: 'screenshots/notes_tab.png' })
+  await expect(notesCard).toHaveScreenshot('notes_card.png')
+  await expect(notesCard).toHaveScreenshot('notes_tab.png')
 })
 
 test('pasted samples keep extra columns in output table', async ({ page }) => {
   await page.goto('/')
+  await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; }' })
   await page.getByText('qPCR plate plans without guesswork').waitFor({ timeout: 60000 })
 
   const textarea = page.locator('textarea').first()
