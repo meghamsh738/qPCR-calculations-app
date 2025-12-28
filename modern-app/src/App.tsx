@@ -252,7 +252,7 @@ function App() {
             <div className="meta-card"><p>Pos controls</p><strong>{numPos}</strong></div>
             <div className="meta-card"><p>Overage</p><strong>{overagePct}%</strong></div>
           </div>
-          <p className="muted">Genes placed row-by-row; genes never split across plates. Controls follow samples/standards.</p>
+          <p className="muted">Each gene starts on its own plate; controls follow samples/standards in-row.</p>
         </div>
       </div>
 
@@ -609,9 +609,9 @@ function App() {
           <div className="section-head"><div><p className="kicker">Notes & rules</p><h2>How placement works</h2></div></div>
           <ul className="bullets">
             <li>Replicates are adjacent in a row; if the row runs out, placement continues on the next row.</li>
-            <li>Genes do not split across plates; if overflow, the gene moves to the next plate.</li>
+            <li>Each gene uses its own plate; genes never share a plate.</li>
             <li>Order within a gene: Samples → Standards → Positives (if any) → RT− → RNA− → Blank.</li>
-            <li>Use plate override to start a gene on a specific plate (e.g., move GAPDH to plate 2).</li>
+            <li>If a gene exceeds 384 wells, reduce inputs or replicates; overrides can skip to a later plate.</li>
             <li>Mix overage increases master-mix volumes only; well counts stay the same.</li>
           </ul>
         </section>

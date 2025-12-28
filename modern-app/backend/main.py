@@ -206,7 +206,6 @@ async def plan(req: PlanRequest):
     plate_counter = 0
 
     for group_genes in gene_groups:
-        row_idx = 0
         for gene, chem_key in group_genes:
             if chem_key not in CHEMISTRY:
                 raise HTTPException(status_code=400, detail=f"Unknown chemistry for {gene}: {chem_key}")
@@ -237,16 +236,12 @@ async def plan(req: PlanRequest):
             override_plate = req.gene_plate_overrides.get(gene)
             if override_plate and override_plate > plate_counter:
                 plate_counter = override_plate - 1
-                row_idx = 0
 
-            if row_idx + rows_needed > len(PLATE_ROWS) or (plate_counter == 0 and row_idx == 0):
-                plate_counter += 1
-                current_plate = f"Plate {plate_counter}"
-                row_idx = 0
-            else:
-                current_plate = f"Plate {plate_counter}"
+            plate_counter += 1
+            current_plate = f"Plate {plate_counter}"
 
             chem = CHEMISTRY[chem_key]
+            row_idx = 0
             col_idx = 0
             placed_for_gene = 0
 
@@ -284,10 +279,6 @@ async def plan(req: PlanRequest):
 
             for label_type, labels in sections:
                 place_block(label_type, labels)
-
-            if col_idx != 0:
-                col_idx = 0
-                row_idx += 1
 
             factor = 1.0 + (req.overage_pct / 100.0)
             mix_equiv_rxn = placed_for_gene * factor

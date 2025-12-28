@@ -16,7 +16,7 @@ Extra captures (full-page + closeups): `screenshots/example_run.png`, `screensho
 
 ## Highlights
 - 384-well 16×24 grid; replicates stay adjacent in-row.
-- Genes never split across plates; overflow moves the gene to the next plate. Optional per-gene plate overrides.
+- Each gene uses its own plate (no shared plates). Optional per-gene plate overrides.
 - Controls: standards, positives, RT−, RNA−, blanks; adjustable mix overage for master-mix only.
 - Outputs: interactive table, TSV copy, CSV/Excel export hooks, per-gene master-mix volumes.
 - Paste samples with multiple columns (tab/comma/space). First token is the label; all remaining columns render in the output table.
