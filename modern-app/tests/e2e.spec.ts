@@ -11,35 +11,37 @@ test('qPCR planner flow', async ({ page }) => {
   await textarea.first().waitFor({ state: 'visible', timeout: 30000 })
   await textarea.fill(samples)
 
+  const samplesCard = page.getByTestId('samples-card')
+  const previewCard = page.getByTestId('preview-card')
+  const outputCard = page.getByTestId('output-card')
+  const masterCard = page.getByTestId('master-card')
+  const notesCard = page.getByTestId('notes-card')
+
   // Initial plan view (before compute) + plan card
   await expect(page).toHaveScreenshot('plan_view.png', { fullPage: true })
-  const cards = page.locator('section.card')
-  await expect(cards.nth(0)).toHaveScreenshot('plan_tab.png')
-  // Plate preview is always visible under the preview card; no tab click needed.
-  await expect(page.locator('.plate-grid')).toHaveScreenshot('plate_preview.png')
+  await expect(samplesCard).toHaveScreenshot('plan_tab.png')
 
   await page.getByTestId('calculate-btn').click()
   // Confirm plan finished and spans multiple plates
   await expect(page.getByRole('cell', { name: 'Plate 1' }).first()).toBeVisible()
-  const plateSelect = cards.nth(3).locator('select')
+  const plateSelect = previewCard.locator('.plate-select')
   await expect(plateSelect).toBeVisible()
   await plateSelect.selectOption({ label: 'Plate 2' })
   await expect(page.getByRole('cell', { name: 'Plate 2' }).first()).toBeVisible()
+  await expect(previewCard).toHaveScreenshot('plate_preview.png')
 
   // Full page after compute (layout + mix)
   await expect(page).toHaveScreenshot('layout_full.png', { fullPage: true })
   await expect(page).toHaveScreenshot('example_run.png', { fullPage: true })
 
   // Layout/output card
-  await expect(cards.nth(2)).toHaveScreenshot('output_tab.png')
+  await expect(outputCard).toHaveScreenshot('output_tab.png')
 
   // Master mix card
-  const masterCard = cards.nth(3)
   await expect(masterCard).toHaveScreenshot('master_mix.png')
   await expect(masterCard).toHaveScreenshot('master_tab.png')
 
   // Notes card
-  const notesCard = cards.nth(4)
   await expect(notesCard).toHaveScreenshot('notes_card.png')
   await expect(notesCard).toHaveScreenshot('notes_tab.png')
 })

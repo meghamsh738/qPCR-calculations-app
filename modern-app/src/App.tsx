@@ -9,7 +9,7 @@ const CONTROL_COLORS: Record<string, string> = {
   Positive: '#f59e0b',
   Negative: '#a855f7',
   Blank: '#94a3b8',
-  Empty: '#1f2937'
+  Empty: '#FFF7EC'
 }
 
 type GeneEntry = {
@@ -60,13 +60,14 @@ const DEFAULT_GENES: GeneEntry[] = [
   { id: 4, name: 'Gapdh', chemistry: 'SYBR' }
 ]
 
-const DEFAULT_SAMPLES = ['Sample1', 'Sample2', 'Sample3', 'Sample4', 'Sample5', 'Sample6']
+const DEFAULT_SAMPLE_COUNT = 80
+const DEFAULT_SAMPLES = Array.from({ length: DEFAULT_SAMPLE_COUNT }, (_, i) => `Sample${i + 1}`)
 const DEFAULT_SAMPLE_TEXT = DEFAULT_SAMPLES.join('\n')
 
 function App() {
   const [usePasted, setUsePasted] = useState(true)
   const [sampleText, setSampleText] = useState(DEFAULT_SAMPLE_TEXT)
-  const [numSamples, setNumSamples] = useState(70)
+  const [numSamples, setNumSamples] = useState(DEFAULT_SAMPLE_COUNT)
   const [numStandards, setNumStandards] = useState(8)
   const [numPos, setNumPos] = useState(0)
   const [replicates, setReplicates] = useState(2)
@@ -263,7 +264,7 @@ function App() {
       )}
 
       <div className="shell grid-2 tall">
-        <section className="card">
+        <section className="card" data-testid="samples-card">
           <div className="section-head">
             <div>
               <p className="kicker">Step 1 · Samples</p>
@@ -321,7 +322,7 @@ function App() {
 
         </section>
 
-        <section className="card">
+        <section className="card" data-testid="genes-card">
           <div className="section-head">
             <div>
               <p className="kicker">Step 2 · Genes & controls</p>
@@ -399,7 +400,7 @@ function App() {
       </div>
 
       <div className="shell">
-        <section className="card plate-preview-card">
+        <section className="card plate-preview-card" data-testid="preview-card">
           <div className="section-head">
             <div>
               <p className="kicker">Preview</p>
@@ -417,7 +418,21 @@ function App() {
 
           <div className="mini-plate">
             <div className="plate-head">
-              <span>Plate preview ({plateFilter || plates[0] || 'Plate 1'})</span>
+              <div className="plate-head-left">
+                <span>Plate preview</span>
+                {plates.length > 1 ? (
+                  <select
+                    className="plate-select"
+                    value={plateFilter || plates[0] || ''}
+                    onChange={(e) => setPlateFilter(e.target.value)}
+                    aria-label="Select plate for preview"
+                  >
+                    {plates.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                ) : (
+                  <span className="muted-small">({plateFilter || plates[0] || 'Plate 1'})</span>
+                )}
+              </div>
               {plateSummary && (
                 <span className="muted-small">{plateSummary.used}/384 used</span>
               )}
@@ -494,7 +509,7 @@ function App() {
       </div>
 
       <div className="shell">
-        <section className="card">
+        <section className="card" data-testid="output-card">
           <div className="section-head output-head">
             <div>
               <p className="kicker">Step 3 · Layout</p>
@@ -554,7 +569,7 @@ function App() {
       </div>
 
       <div className="shell grid-2">
-        <section className="card">
+        <section className="card" data-testid="master-card">
           <div className="section-head"><div><p className="kicker">Master mix totals</p><h2>Per gene</h2></div></div>
           {mix.length === 0 && <div className="empty"><p className="muted">Compute to see mix totals.</p></div>}
           {mix.length > 0 && (
@@ -590,7 +605,7 @@ function App() {
           )}
         </section>
 
-        <section className="card notes">
+        <section className="card notes" data-testid="notes-card">
           <div className="section-head"><div><p className="kicker">Notes & rules</p><h2>How placement works</h2></div></div>
           <ul className="bullets">
             <li>Replicates are adjacent in a row; if the row runs out, placement continues on the next row.</li>

@@ -1,53 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
-  --font-display: 'Chakra Petch', 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  --font-sans: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
   --tracking-display: 0.08em;
   --tracking-label: 0.12em;
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-7: 32px;
-  --space-8: 48px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
   --s-4: 16px;
   --s-5: 24px;
   --s-6: 32px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
+  --s-7: 48px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
   --scrollbar-gap: 8px;
 
-  font-family: var(--font-body);
-  line-height: 1.5;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  color: var(--text);
-  background-color: var(--bg);
-  --bg: #f4f6fb;
-  --panel: #ffffff;
-  --surface: var(--panel);
-  --surface-2: #f7f8fc;
-  --surface-3: #eef2f7;
-  --border: rgba(15, 23, 42, 0.12);
-  --border-2: rgba(15, 23, 42, 0.2);
-  --muted: #5b6b85;
-  --text: #0f172a;
-  --text-subtle: #344054;
-  --text-2: var(--text-subtle);
-  --text-3: var(--muted);
-  --accent: #2f6af6;
-  --accent-strong: #1d4ed8;
-  --accent-soft: rgba(47, 106, 246, 0.14);
-  --accent-weak: var(--accent-soft);
-  --focus: rgba(47, 106, 246, 0.35);
+  --bg: #F6F2EA;
+  --panel: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #FFF7EC;
+  --surface-3: #F2EADF;
+
+  --text: #111113;
+  --text-subtle: #2F2F36;
+  --text-2: #2F2F36;
+  --text-3: #575762;
+  --muted: #575762;
+
+  --border: #15151A;
+  --border-2: #0F0F14;
+
+  --accent: #1F5BFF;
+  --accent-strong: #1F5BFF;
+  --accent-soft: rgba(31, 91, 255, 0.18);
+  --accent-weak: rgba(31, 91, 255, 0.18);
+  --focus: rgba(31, 91, 255, 0.35);
+
+  --danger: #B42318;
+  --danger-weak: rgba(180, 35, 24, 0.12);
   --success: #12b76a;
   --success-soft: rgba(18, 183, 106, 0.16);
   --success-bg: var(--success-soft);
@@ -56,8 +60,20 @@
   --warning-soft: rgba(245, 158, 11, 0.18);
   --warning-bg: var(--warning-soft);
   --warning-border: rgba(245, 158, 11, 0.42);
-  --shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
-  --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
+
+  --shadow-1: 3px 3px 0 rgba(17, 17, 20, 0.9);
+  --shadow-2: 10px 10px 0 rgba(17, 17, 20, 0.9);
+  --shadow: var(--shadow-2);
+  --shadow-soft: var(--shadow-1);
+
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text);
+  background-color: var(--bg);
+  color-scheme: light;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -78,7 +94,12 @@ a:hover {
 body {
   margin: 0;
   background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
+}
+
+::selection {
+  background: var(--accent-weak);
 }
 
 button {

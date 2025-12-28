@@ -2,7 +2,7 @@
 
 Modern React + FastAPI app for qPCR plate calculations. The web app lives in `modern-app/`.
 
-Latest UI (refreshed Dec 25, 2025 via `npm run test:e2e`, mock with 80 samples):
+Latest UI (refreshed Dec 28, 2025 via `npm run test:e2e`, 80-sample multi-plate run with Plate 2 selected in preview):
 
 | App overview | Plate preview | Output table | Master mix |
 | --- | --- | --- | --- |
