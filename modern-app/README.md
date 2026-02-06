@@ -2,6 +2,10 @@
 
 Paste samples, pick genes/chemistry/replicates, add controls/overage, and get multi-plate 384-well layouts plus master-mix totals. Styling matches the lab notebook neo-brutalist system. Screenshots below come from a Playwright run (Dec 28, 2025) using 80 samples to force multiple plates; Plate 2 is selected in the preview.
 
+Part of **Easylab Suite**: this repo is bundled as the **qPCR Planner** module (`qpcr-planner`).
+
+License: All Rights Reserved.
+
 Latest captures (Playwright run, 80 samples, multi-plate):
 
 | Plan view | Plate preview | Output table | Master mix | Notes |
@@ -35,6 +39,20 @@ python3 -m venv .venv
 npm run dev:full   # front :5176, API :8003
 ```
 Open http://localhost:5176 and click **Compute layout** (or mock `/plan` if you just want UI).
+
+## Desktop Installer (Windows)
+From the repo root (one level above `modern-app`):
+
+```bash
+npm install
+npm run build:electron
+```
+
+The installer is generated in `desktop/dist/` as an `.exe` (NSIS). On first run, the app asks for storage folders and creates them for you.
+
+Notes:
+- The packaged app expects Python 3.10+ available on PATH to run the FastAPI backend. You can set `APP_PYTHON_PATH` to a specific Python executable if needed.
+- The installer is unsigned unless code-signing credentials are configured.
 
 ## Data format & quick AI helper
 - Simplest input: two-column CSV/TSV with headers `Sample, Conc` (ng/µL). The app also accepts wider tables; the first token per row becomes the label.

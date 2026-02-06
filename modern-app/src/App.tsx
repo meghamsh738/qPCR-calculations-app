@@ -53,6 +53,73 @@ type PlanResponse = {
   sample_headers?: string[]
 }
 
+type AppPaths = {
+  dataPath: string
+  attachmentsPath: string
+  exportsPath: string
+  syncPath: string
+}
+
+type ElectronAPI = {
+  selectDirectory: (options?: { title?: string; defaultPath?: string }) => Promise<string | null>
+  ensureDirectories: (paths: Record<string, string>) => Promise<{ ok: boolean; message?: string }>
+  getAppInfo: () => Promise<{ name: string; version: string; platform?: string }>
+  getDefaultPaths: () => Promise<AppPaths>
+}
+
+const STORAGE_KEY = 'easylab:qpcr-planner:paths'
+const resolveApiBase = () => {
+  if (typeof window === 'undefined') return undefined
+  const params = new URLSearchParams(window.location.search)
+  const queryBase = params.get('apiBase') ?? undefined
+  const injected = (window as Window & { __EASYLAB_API__?: string }).__EASYLAB_API__
+  return injected ?? queryBase
+}
+
+const API_BASE = resolveApiBase() ?? import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8003'
+
+const PATH_FIELDS: Array<{ key: keyof AppPaths; label: string; helper: string }> = [
+  { key: 'dataPath', label: 'Data folder', helper: 'Saved calculations, cached state, and metadata.' },
+  { key: 'attachmentsPath', label: 'Attachments folder', helper: 'Files generated or stored with this workspace.' },
+  { key: 'exportsPath', label: 'Exports folder', helper: 'CSV / Excel export destination.' },
+  { key: 'syncPath', label: 'Sync folder', helper: 'Optional sync target for backups.' },
+]
+
+const fallbackPaths = (): AppPaths => ({
+  dataPath: 'Easylab/qPCR Planner/data',
+  attachmentsPath: 'Easylab/qPCR Planner/attachments',
+  exportsPath: 'Easylab/qPCR Planner/exports',
+  syncPath: 'Easylab/qPCR Planner/sync',
+})
+
+const readStoredPaths = (): AppPaths | null => {
+  if (typeof window === 'undefined') return null
+  const raw = window.localStorage.getItem(STORAGE_KEY)
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as Partial<AppPaths>
+    if (!parsed || typeof parsed !== 'object') return null
+    return {
+      dataPath: parsed.dataPath ?? '',
+      attachmentsPath: parsed.attachmentsPath ?? '',
+      exportsPath: parsed.exportsPath ?? '',
+      syncPath: parsed.syncPath ?? '',
+    }
+  } catch {
+    return null
+  }
+}
+
+const persistPaths = (paths: AppPaths) => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(paths))
+}
+
+const getElectronAPI = (): ElectronAPI | null => {
+  if (typeof window === 'undefined') return null
+  return (window as typeof window & { electronAPI?: ElectronAPI }).electronAPI ?? null
+}
+
 const DEFAULT_GENES: GeneEntry[] = [
   { id: 1, name: 'Tnf', chemistry: 'TaqMan' },
   { id: 2, name: 'Ccl2', chemistry: 'SYBR' },
@@ -65,6 +132,15 @@ const DEFAULT_SAMPLES = Array.from({ length: DEFAULT_SAMPLE_COUNT }, (_, i) => `
 const DEFAULT_SAMPLE_TEXT = DEFAULT_SAMPLES.join('\n')
 
 function App() {
+  const [storedPaths] = useState(() => readStoredPaths())
+  const [paths, setPaths] = useState<AppPaths>(() => storedPaths ?? fallbackPaths())
+  const [defaultPaths, setDefaultPaths] = useState<AppPaths>(() => storedPaths ?? fallbackPaths())
+  const [setupOpen, setSetupOpen] = useState(() => !storedPaths)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [setupError, setSetupError] = useState<string | null>(null)
+  const [savingSetup, setSavingSetup] = useState(false)
+  const [appInfo, setAppInfo] = useState<{ name: string; version: string } | null>(null)
+
   const [usePasted, setUsePasted] = useState(true)
   const [sampleText, setSampleText] = useState(DEFAULT_SAMPLE_TEXT)
   const [numSamples, setNumSamples] = useState(DEFAULT_SAMPLE_COUNT)
@@ -84,6 +160,85 @@ function App() {
   const [plateFilter, setPlateFilter] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    const api = getElectronAPI()
+    if (!storedPaths && api?.getDefaultPaths) {
+      api.getDefaultPaths().then((defaults: AppPaths) => {
+        if (!active) return
+        setDefaultPaths(defaults)
+        setPaths(defaults)
+      }).catch(() => {})
+    }
+    if (api?.getAppInfo) {
+      api.getAppInfo().then((info: { name: string; version: string }) => {
+        if (!active) return
+        setAppInfo(info)
+      }).catch(() => {})
+    }
+    return () => {
+      active = false
+    }
+  }, [storedPaths])
+
+  const updatePath = (key: keyof AppPaths, value: string) => {
+    setPaths((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const handlePick = async (key: keyof AppPaths, label: string) => {
+    const api = getElectronAPI()
+    if (!api?.selectDirectory) return
+    const selection = await api.selectDirectory({ title: `Select ${label}`, defaultPath: paths[key] })
+    if (selection) updatePath(key, selection)
+  }
+
+  const handleUseDefaults = () => {
+    setPaths(defaultPaths)
+    setSetupError(null)
+  }
+
+  const ensureDirectories = async (nextPaths: AppPaths) => {
+    const api = getElectronAPI()
+    if (api?.ensureDirectories) {
+      return api.ensureDirectories(nextPaths)
+    }
+    return { ok: true }
+  }
+
+  const handleFinishSetup = async () => {
+    setSetupError(null)
+    setSavingSetup(true)
+    try {
+      const trimmed: AppPaths = {
+        dataPath: paths.dataPath.trim(),
+        attachmentsPath: paths.attachmentsPath.trim(),
+        exportsPath: paths.exportsPath.trim(),
+        syncPath: paths.syncPath.trim(),
+      }
+      const missing = Object.entries(trimmed).filter(([, value]) => !value)
+      if (missing.length) {
+        setSetupError('Please fill all paths before finishing setup.')
+        setSavingSetup(false)
+        return
+      }
+      const result = await ensureDirectories(trimmed)
+      if (!result?.ok) {
+        setSetupError(result?.message || 'Unable to create folders.')
+        setSavingSetup(false)
+        return
+      }
+      persistPaths(trimmed)
+      setSetupOpen(false)
+      setSettingsOpen(false)
+    } catch (err) {
+      setSetupError(err instanceof Error ? err.message : 'Setup failed.')
+    } finally {
+      setSavingSetup(false)
+    }
+  }
+
+  const isDesktop = typeof window !== 'undefined' && !!getElectronAPI()
 
   useEffect(() => {
     if (!plateFilter && summary.length) {
@@ -182,7 +337,7 @@ function App() {
         gene_plate_overrides: overrides
       }
 
-      const res = await fetch('http://localhost:8003/plan', {
+      const res = await fetch(`${API_BASE}/plan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -230,6 +385,115 @@ function App() {
 
   return (
     <div className="page">
+      {setupOpen && (
+        <div className="modal-overlay" data-testid="setup-overlay">
+          <div className="modal setup-modal">
+            <div className="modal-head">
+              <div>
+                <p className="kicker">First run setup</p>
+                <h2>Choose storage folders</h2>
+                <p className="muted">
+                  These folders keep exports, attachments, and sync data together. You can edit them later in Settings.
+                </p>
+              </div>
+              <span className="pill ghost">Required</span>
+            </div>
+
+            <div className="modal-grid">
+              {PATH_FIELDS.map((field) => (
+                <label key={field.key} className="field path-field">
+                  <span className="kicker">{field.label}</span>
+                  <div className="field-row">
+                    <input
+                      value={paths[field.key]}
+                      onChange={(event) => updatePath(field.key, event.target.value)}
+                      placeholder={defaultPaths[field.key]}
+                      data-testid={`path-${field.key}`}
+                    />
+                    {isDesktop && (
+                      <button className="ghost" type="button" onClick={() => handlePick(field.key, field.label)}>
+                        Browse
+                      </button>
+                    )}
+                  </div>
+                  <span className="muted-small">{field.helper}</span>
+                </label>
+              ))}
+            </div>
+
+            {setupError && <div className="setup-message error" role="alert">{setupError}</div>}
+            {!isDesktop && (
+              <div className="setup-message">
+                Folder creation runs automatically in the desktop app. In the web build, paths are stored for reference.
+              </div>
+            )}
+
+            <div className="modal-actions">
+              <button className="ghost" type="button" onClick={handleUseDefaults}>
+                Use defaults
+              </button>
+              <button className="primary" type="button" onClick={handleFinishSetup} data-testid="setup-finish" disabled={savingSetup}>
+                {savingSetup ? 'Saving…' : 'Finish setup'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {settingsOpen && (
+        <div className="modal-overlay" data-testid="settings-overlay">
+          <div className="modal settings-modal">
+            <div className="modal-head">
+              <div>
+                <p className="kicker">Settings</p>
+                <h2>Storage paths</h2>
+                <p className="muted">Update where this app stores outputs and sync content.</p>
+              </div>
+              <button className="ghost" type="button" onClick={() => setSettingsOpen(false)}>
+                Close
+              </button>
+            </div>
+
+            <div className="modal-grid">
+              {PATH_FIELDS.map((field) => (
+                <label key={field.key} className="field path-field">
+                  <span className="kicker">{field.label}</span>
+                  <div className="field-row">
+                    <input
+                      value={paths[field.key]}
+                      onChange={(event) => updatePath(field.key, event.target.value)}
+                      placeholder={defaultPaths[field.key]}
+                    />
+                    {isDesktop && (
+                      <button className="ghost" type="button" onClick={() => handlePick(field.key, field.label)}>
+                        Browse
+                      </button>
+                    )}
+                  </div>
+                  <span className="muted-small">{field.helper}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="about-card">
+              <div className="section-title">About</div>
+              <p className="muted">Easylab qPCR Planner</p>
+              <p className="muted-small">Version: {appInfo?.version ?? 'Web build'}</p>
+              <p className="muted-small">License: All Rights Reserved.</p>
+            </div>
+
+            <div className="modal-actions">
+              <button className="ghost" type="button" onClick={handleUseDefaults}>
+                Reset to defaults
+              </button>
+              <button className="primary" type="button" onClick={handleFinishSetup}>
+                Save settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="hero">
         <div className="hero-text">
           <div className="tag">384-well · QuantStudio 5</div>
@@ -242,6 +506,9 @@ function App() {
             <span className="pill">16 × 24 grid</span>
             <span className="pill">Adjacent replicates</span>
             <span className="pill">Per-gene plate overrides</span>
+            <button className="ghost" type="button" onClick={() => setSettingsOpen(true)} data-testid="open-settings">
+              Settings
+            </button>
           </div>
         </div>
         <div className="hero-meta">
@@ -616,6 +883,14 @@ function App() {
           </ul>
         </section>
       </div>
+
+      <footer className="signature" data-testid="signature">
+        <span className="sig-primary">Made by Meghamsh Teja Konda</span>
+        <span className="sig-dot" aria-hidden="true" />
+        <a className="sig-link" href="mailto:meghamshteja555@gmail.com">
+          meghamshteja555@gmail.com
+        </a>
+      </footer>
     </div>
   )
 }

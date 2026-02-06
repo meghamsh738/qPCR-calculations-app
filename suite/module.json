@@ -1,0 +1,25 @@
+{
+  "id": "qpcr-planner",
+  "name": "qPCR Planner",
+  "repoName": "qpcr-calculations-app-git",
+  "type": "fastapi",
+  "defaultPort": 8012,
+  "frontend": {
+    "kind": "vite-react",
+    "root": "modern-app",
+    "buildOutput": ".app-dist/web"
+  },
+  "backend": {
+    "kind": "fastapi",
+    "root": "modern-app/backend",
+    "entry": "backend.main:app"
+  },
+  "storage": {
+    "label": "qPCR Planner"
+  },
+  "signature": {
+    "madeBy": "Meghamsh Teja Konda",
+    "contactEmail": "meghamshteja555@gmail.com"
+  }
+}
+

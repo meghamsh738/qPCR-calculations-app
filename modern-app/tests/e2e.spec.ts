@@ -1,9 +1,32 @@
 import { test, expect } from '@playwright/test'
 
-test('qPCR planner flow', async ({ page }) => {
+const waitForApi = async (request: { get: (url: string) => Promise<{ status: () => number }> }) => {
+  await expect
+    .poll(
+      async () => {
+        try {
+          const res = await request.get('http://127.0.0.1:8003/openapi.json')
+          return res.status()
+        } catch {
+          return 0
+        }
+      },
+      { timeout: 30_000 }
+    )
+    .toBe(200)
+}
+
+test('qPCR planner flow', async ({ page, request }) => {
+  await waitForApi(request)
   await page.goto('/')
-  await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; }' })
+  await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; } .signature { display: none !important; }' })
   await page.getByText('qPCR plate plans without guesswork').waitFor({ timeout: 60000 })
+
+  const setupOverlay = page.getByTestId('setup-overlay')
+  if (await setupOverlay.isVisible()) {
+    await page.getByTestId('setup-finish').click()
+    await expect(setupOverlay).toBeHidden()
+  }
 
   // Use a long pasted list so the run spans at least two plates
   const samples = Array.from({ length: 80 }, (_, i) => `Sample${i + 1}`).join('\n')
@@ -46,10 +69,17 @@ test('qPCR planner flow', async ({ page }) => {
   await expect(notesCard).toHaveScreenshot('notes_tab.png')
 })
 
-test('pasted samples keep extra columns in output table', async ({ page }) => {
+test('pasted samples keep extra columns in output table', async ({ page, request }) => {
+  await waitForApi(request)
   await page.goto('/')
-  await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; }' })
+  await page.addStyleTag({ content: '* { transition: none !important; animation: none !important; } .signature { display: none !important; }' })
   await page.getByText('qPCR plate plans without guesswork').waitFor({ timeout: 60000 })
+
+  const setupOverlay = page.getByTestId('setup-overlay')
+  if (await setupOverlay.isVisible()) {
+    await page.getByTestId('setup-finish').click()
+    await expect(setupOverlay).toBeHidden()
+  }
 
   const textarea = page.locator('textarea').first()
   await textarea.waitFor({ state: 'visible', timeout: 30000 })

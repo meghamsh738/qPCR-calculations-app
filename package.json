@@ -1,0 +1,61 @@
+{
+  "name": "easylab-qpcr-planner",
+  "version": "0.1.0",
+  "description": "Easylab qPCR planner desktop app",
+  "author": "Meghamsh Teja",
+  "private": true,
+  "main": "desktop/electron/main.cjs",
+  "scripts": {
+    "dev": "npm --prefix modern-app run dev",
+    "build": "npm --prefix modern-app run build",
+    "lint": "npm --prefix modern-app run lint",
+    "test:e2e": "npm --prefix modern-app run test:e2e",
+    "screenshots": "npm --prefix modern-app run test:e2e",
+    "icons": "node desktop/scripts/generate-icons.mjs",
+    "dev:electron": "concurrently -k \"npm --prefix modern-app run dev -- --host\" \"wait-on http://127.0.0.1:5176 && electron .\"",
+    "build:electron": "npm --prefix modern-app run build && npm run icons && electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "electron": "^30.0.0",
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^2.1.0",
+    "sharp": "^0.33.5",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.meghamshteja.easylab.qpcrplanner",
+    "productName": "Easylab qPCR Planner",
+    "copyright": "Copyright © 2026 Meghamsh Teja. All Rights Reserved.",
+    "directories": {
+      "buildResources": "desktop/build",
+      "output": "desktop/dist"
+    },
+    "files": [
+      "desktop/electron/**/*",
+      ".app-dist/web/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "modern-app/backend",
+        "to": "backend"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "desktop/build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "license": "LICENSE"
+    }
+  }
+}

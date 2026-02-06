@@ -9,8 +9,10 @@ __pycache__/
 
 # build outputs
 dist/
+.app-dist/
 .tmp/
 tmpfile
+desktop/dist/
 
 # test artifacts
 test-results/

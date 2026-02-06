@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // Ignore build output and any `node_modules*` directories (WSL + drvfs workarounds may create backups).
+  globalIgnores(['dist', 'node_modules*']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
