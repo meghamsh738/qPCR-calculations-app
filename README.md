@@ -3,7 +3,6 @@
 Modern React + FastAPI app for qPCR plate calculations. The web app lives in `modern-app/`.
 
 Part of **Easylab Suite**: when bundled, it launches from the suite desktop launcher as the **qPCR Planner** module.
-
 License: All Rights Reserved.
 
 Latest UI (refreshed Dec 28, 2025 via `npm run test:e2e`, 80-sample multi-plate run with Plate 2 selected in preview):

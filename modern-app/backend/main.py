@@ -195,15 +195,56 @@ async def plan(req: PlanRequest):
     else:
         gene_groups.append(genes)
 
+    # Placement rules:
+    # - Do NOT mix chemistries on the same physical plate.
+    # - Pack multiple genes of the same chemistry onto as few plates as possible.
+    # - A gene starts at column 1 (i.e., the start of a fresh row) even if the previous gene
+    #   ended mid-row; we waste the remainder of that row so genes stay visually grouped.
+    #
+    # We preserve gene order within each chemistry (stable by first appearance).
+    chemistry_groups: List[Tuple[str, List[Tuple[str, str]]]] = []
+    for group_genes in gene_groups:
+        by_chem: Dict[str, List[Tuple[str, str]]] = {}
+        chem_order: List[str] = []
+        for gene, chem_key in group_genes:
+            if chem_key not in by_chem:
+                by_chem[chem_key] = []
+                chem_order.append(chem_key)
+            by_chem[chem_key].append((gene, chem_key))
+        for chem_key in chem_order:
+            chemistry_groups.append((chem_key, by_chem[chem_key]))
+
     all_layout = []
     all_mix: List[dict] = []
     plates_dict: Dict[str, List[dict]] = defaultdict(list)
     plate_counter = 0
 
-    for group_genes in gene_groups:
-        for gene, chem_key in group_genes:
-            if chem_key not in CHEMISTRY:
-                raise HTTPException(status_code=400, detail=f"Unknown chemistry for {gene}: {chem_key}")
+    current_plate = None
+    row_idx = 0
+    col_idx = 0
+
+    def start_new_plate(target_plate=None):
+        nonlocal plate_counter, current_plate, row_idx, col_idx
+        if target_plate and target_plate > plate_counter + 1:
+            # Keep numbering stable if the user pins a gene to a later plate.
+            plate_counter = target_plate - 1
+        plate_counter += 1
+        current_plate = f"Plate {plate_counter}"
+        row_idx = 0
+        col_idx = 0
+
+    for chem_key, group_genes in chemistry_groups:
+        if chem_key not in CHEMISTRY:
+            # Fail early with a chemistry-focused error even if multiple genes share it.
+            bad_gene = next((g for g, c in group_genes if c == chem_key), "unknown")
+            raise HTTPException(status_code=400, detail=f"Unknown chemistry for {bad_gene}: {chem_key}")
+
+        # New chemistry group always starts on a fresh plate (no mixing).
+        current_plate = None
+        row_idx = 0
+        col_idx = 0
+
+        for gene, gene_chem_key in group_genes:
 
             sections = []
             sections.append(("Sample", samples))
@@ -228,15 +269,19 @@ async def plan(req: PlanRequest):
                     ),
                 )
 
-            override_plate = req.gene_plate_overrides.get(gene)
-            if override_plate and override_plate > plate_counter:
-                plate_counter = override_plate - 1
+            override_plate = req.gene_plate_overrides.get(gene) or None
 
-            plate_counter += 1
-            current_plate = f"Plate {plate_counter}"
+            # Ensure the gene starts on a plate >= override_plate (if provided).
+            if current_plate is None:
+                start_new_plate(override_plate)
+            elif override_plate and plate_counter < override_plate:
+                start_new_plate(override_plate)
+            elif row_idx + rows_needed > len(PLATE_ROWS):
+                start_new_plate(override_plate)
 
-            chem = CHEMISTRY[chem_key]
-            row_idx = 0
+            chem = CHEMISTRY[gene_chem_key]
+
+            # New gene always starts at the first column of a row.
             col_idx = 0
             placed_for_gene = 0
 
@@ -275,11 +320,16 @@ async def plan(req: PlanRequest):
             for label_type, labels in sections:
                 place_block(label_type, labels)
 
+            # End-of-gene alignment: do not let the next gene start mid-row.
+            if col_idx != 0:
+                col_idx = 0
+                row_idx += 1
+
             factor = 1.0 + (req.overage_pct / 100.0)
             mix_equiv_rxn = placed_for_gene * factor
             all_mix.append({
                 "Gene": gene,
-                "Chemistry": chem_key,
+                "Chemistry": gene_chem_key,
                 "placed_reactions": placed_for_gene,
                 "mix_factor": factor,
                 "mix_equiv_rxn": mix_equiv_rxn,

@@ -1,5 +1,25 @@
 import { test, expect } from '@playwright/test'
 
+type PlanLayoutRow = {
+  Plate: string
+  Well: string
+  Gene: string
+  Type: string
+  Label: string
+  Replicate: number
+}
+
+type PlanSummaryRow = {
+  plate: string
+  used: number
+  empty: number
+}
+
+type PlanResponse = {
+  layout: PlanLayoutRow[]
+  summary: PlanSummaryRow[]
+}
+
 const waitForApi = async (request: { get: (url: string) => Promise<{ status: () => number }> }) => {
   await expect
     .poll(
@@ -15,6 +35,81 @@ const waitForApi = async (request: { get: (url: string) => Promise<{ status: () 
     )
     .toBe(200)
 }
+
+test('API packs genes by chemistry and aligns each gene block to column 1', async ({ request }) => {
+  await waitForApi(request)
+
+  const payload = {
+    num_samples: 3,
+    num_standards: 0,
+    num_pos: 0,
+    replicates: 2,
+    overage_pct: 0,
+    place_gapdh_separate: false,
+    include_rtneg: false,
+    include_rnaneg: false,
+    use_pasted_samples: false,
+    pasted_samples: [],
+    genes: [
+      { name: 'GeneA', chemistry: 'SYBR' },
+      { name: 'GeneB', chemistry: 'SYBR' },
+      { name: 'GeneC', chemistry: 'SYBR' }
+    ],
+    gene_plate_overrides: {}
+  }
+
+  const res = await request.post('http://127.0.0.1:8003/plan', { data: payload })
+  expect(res.status()).toBe(200)
+  const json = (await res.json()) as PlanResponse
+
+  // All three genes should fit onto a single plate when they share chemistry.
+  expect(json.summary).toHaveLength(1)
+  expect(json.summary[0].plate).toBe('Plate 1')
+
+  const starts = (gene: string) =>
+    json.layout.find((r) => r.Gene === gene && r.Type === 'Sample' && r.Label === 'S1' && r.Replicate === 1)
+
+  // Each gene block should start at column 1 (new row) rather than mid-row.
+  expect(starts('GeneA')?.Well).toBe('A1')
+  expect(starts('GeneB')?.Well).toBe('B1')
+  expect(starts('GeneC')?.Well).toBe('C1')
+})
+
+test('API does not mix chemistries on a single plate', async ({ request }) => {
+  await waitForApi(request)
+
+  const payload = {
+    num_samples: 1,
+    num_standards: 0,
+    num_pos: 0,
+    replicates: 2,
+    overage_pct: 0,
+    place_gapdh_separate: false,
+    include_rtneg: false,
+    include_rnaneg: false,
+    use_pasted_samples: false,
+    pasted_samples: [],
+    genes: [
+      { name: 'GeneSYBR', chemistry: 'SYBR' },
+      { name: 'GeneTaq', chemistry: 'TaqMan' }
+    ],
+    gene_plate_overrides: {}
+  }
+
+  const res = await request.post('http://127.0.0.1:8003/plan', { data: payload })
+  expect(res.status()).toBe(200)
+  const json = (await res.json()) as PlanResponse
+
+  // Even though both genes could fit on one plate by wells, chemistry separation forces a new plate.
+  expect(json.summary.map((s) => s.plate)).toEqual(['Plate 1', 'Plate 2'])
+
+  const sybrStart = json.layout.find((r) => r.Gene === 'GeneSYBR' && r.Type === 'Sample' && r.Label === 'S1' && r.Replicate === 1)
+  const taqStart = json.layout.find((r) => r.Gene === 'GeneTaq' && r.Type === 'Sample' && r.Label === 'S1' && r.Replicate === 1)
+  expect(sybrStart?.Plate).toBe('Plate 1')
+  expect(sybrStart?.Well).toBe('A1')
+  expect(taqStart?.Plate).toBe('Plate 2')
+  expect(taqStart?.Well).toBe('A1')
+})
 
 test('qPCR planner flow', async ({ page, request }) => {
   await waitForApi(request)
