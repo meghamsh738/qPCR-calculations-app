@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { GuidedTutorial, type TutorialStep } from './GuidedTutorial'
 
 const PLATE_ROWS = 'ABCDEFGHIJKLMNOP'.split('')
 const PLATE_COLS = Array.from({ length: 24 }, (_, i) => i + 1)
@@ -257,6 +258,37 @@ function App() {
     if (!plateFilter) return layout
     return layout.filter(l => l.Plate === plateFilter)
   }, [layout, plateFilter])
+
+  const tutorialSteps: TutorialStep[] = useMemo(
+    () => [
+      {
+        selector: '[data-testid="samples-card"]',
+        title: 'Load samples',
+        description: 'Paste sample labels here or switch to count mode before planning.',
+      },
+      {
+        selector: '[data-testid="genes-card"]',
+        title: 'Set genes and controls',
+        description: 'Configure genes, chemistry, controls, and replicates for the run.',
+      },
+      {
+        selector: '[data-testid="calculate-btn"]',
+        title: 'Compute layout',
+        description: 'Generate plate placements and mix totals from your current settings.',
+      },
+      {
+        selector: '[data-testid="preview-card"]',
+        title: 'Check plate preview',
+        description: 'Confirm the 384-well layout looks correct before exporting.',
+      },
+      {
+        selector: '[data-testid="output-copy-tsv-btn"]',
+        title: 'Copy final output',
+        description: 'Copy the planned layout table for downstream worksheet use.',
+      },
+    ],
+    []
+  )
 
   const hasAnyWells = filteredLayout.length > 0
 
@@ -788,10 +820,14 @@ function App() {
               <span className="pill ghost">Samples: {usePasted ? sampleText.split('\n').filter(Boolean).length : numSamples}</span>
             </div>
             <div className="button-row">
+              <GuidedTutorial
+                steps={tutorialSteps}
+                startLabel="Tutorial"
+              />
               <select value={plateFilter} onChange={(e) => setPlateFilter(e.target.value)}>
                 {plates.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
-              <button className="ghost" onClick={copyTSV} disabled={!layout.length}>Copy TSV</button>
+              <button className="ghost" onClick={copyTSV} disabled={!layout.length} data-testid="output-copy-tsv-btn">Copy TSV</button>
             </div>
           </div>
 
