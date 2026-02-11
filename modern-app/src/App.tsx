@@ -262,29 +262,83 @@ function App() {
   const tutorialSteps: TutorialStep[] = useMemo(
     () => [
       {
-        selector: '[data-testid="samples-card"]',
-        title: 'Load samples',
-        description: 'Paste sample labels here or switch to count mode before planning.',
+        selector: '[data-testid="samples-mode-toggle"]',
+        title: 'Choose sample input mode',
+        description: 'Pick whether samples come from a pasted list or a numeric sample count.',
+        details: [
+          'Use pasted mode when you already have sample IDs.',
+          'Use count mode for quick planning before labels are finalized.',
+        ],
+      },
+      {
+        selector: '[data-testid="samples-textarea"]',
+        title: 'Paste sample list',
+        description: 'Provide one sample per line. Extra columns are preserved in output.',
+        details: [
+          'First token is treated as sample label.',
+          'Additional columns are carried as metadata in final layout table.',
+        ],
+      },
+      {
+        selector: '[data-testid="standards-input"]',
+        title: 'Set controls and replicate count',
+        description: 'Configure standards, positives, and replicates before planning.',
+        details: [
+          'Replicates control how many wells are assigned per sample per gene.',
+          'Standards and controls are appended per gene in planned order.',
+        ],
+      },
+      {
+        selector: '[data-testid="gapdh-separate-toggle"]',
+        title: 'Gene-level options',
+        description: 'Use toggles for GAPDH separation and negative-control inclusion.',
+        details: [
+          'Include RT− and RNA− to reserve wells for negative controls.',
+          'Gapdh separate keeps housekeeping control isolated on its own plate.',
+        ],
       },
       {
         selector: '[data-testid="genes-card"]',
-        title: 'Set genes and controls',
-        description: 'Configure genes, chemistry, controls, and replicates for the run.',
+        title: 'Configure gene rows',
+        description: 'For each gene set chemistry and optional plate override.',
+        details: [
+          'SYBR uses primer columns; TaqMan includes probe volume in mix totals.',
+          'Plate override forces a gene to start on a chosen plate index.',
+        ],
       },
       {
         selector: '[data-testid="calculate-btn"]',
         title: 'Compute layout',
-        description: 'Generate plate placements and mix totals from your current settings.',
+        description: 'Runs placement and mix planning using all current settings.',
+        details: [
+          'Creates per-well assignment table.',
+          'Creates per-gene master-mix totals.',
+          'Updates preview and output cards.',
+        ],
       },
       {
         selector: '[data-testid="preview-card"]',
-        title: 'Check plate preview',
-        description: 'Confirm the 384-well layout looks correct before exporting.',
+        title: 'Validate plate preview',
+        description: 'Check occupancy and color-coded well types in the 384-well schematic.',
+        details: [
+          'Use plate selector to inspect each generated plate.',
+          'Confirm standards/controls are in expected regions.',
+        ],
+      },
+      {
+        selector: '[data-testid="output-card"]',
+        title: 'Review output table',
+        description: 'Inspect the final per-well plan before copy/export.',
+        details: [
+          'Columns include well, gene, type, label, replicate, and metadata.',
+          'Filter by plate to review subsets.',
+        ],
       },
       {
         selector: '[data-testid="output-copy-tsv-btn"]',
-        title: 'Copy final output',
-        description: 'Copy the planned layout table for downstream worksheet use.',
+        title: 'Copy TSV (final step)',
+        description: 'Copy layout rows for external spreadsheets or lab documents.',
+        details: ['Use after verifying preview and output table.'],
       },
     ],
     []
@@ -579,6 +633,7 @@ function App() {
                   type="checkbox"
                   checked={usePasted}
                   onChange={(e) => setUsePasted(e.target.checked)}
+                  data-testid="samples-mode-toggle"
                 />
                 <span className="toggle-ui" />
                 <span className="toggle-label">Use pasted samples</span>
@@ -592,6 +647,7 @@ function App() {
                 className="textarea large"
                 value={sampleText}
                 onChange={(e) => setSampleText(e.target.value)}
+                data-testid="samples-textarea"
               />
             ) : (
               <div className="controls">
@@ -633,7 +689,12 @@ function App() {
           <div className="controls">
             <label className="control">
               <span># Standards</span>
-              <input type="number" value={numStandards} onChange={(e) => setNumStandards(parseInt(e.target.value || '0', 10))} />
+              <input
+                type="number"
+                value={numStandards}
+                onChange={(e) => setNumStandards(parseInt(e.target.value || '0', 10))}
+                data-testid="standards-input"
+              />
             </label>
             <label className="control">
               <span># Pos controls</span>
@@ -650,7 +711,15 @@ function App() {
           </div>
 
           <div className="controls">
-            <label className="control"><span>GAPDH separate plate</span><input type="checkbox" checked={gapdhSeparate} onChange={(e) => setGapdhSeparate(e.target.checked)} /></label>
+            <label className="control">
+              <span>GAPDH separate plate</span>
+              <input
+                type="checkbox"
+                checked={gapdhSeparate}
+                onChange={(e) => setGapdhSeparate(e.target.checked)}
+                data-testid="gapdh-separate-toggle"
+              />
+            </label>
             <label className="control"><span>Include RT−</span><input type="checkbox" checked={includeRtNeg} onChange={(e) => setIncludeRtNeg(e.target.checked)} /></label>
             <label className="control"><span>Include RNA−</span><input type="checkbox" checked={includeRnaNeg} onChange={(e) => setIncludeRnaNeg(e.target.checked)} /></label>
           </div>
