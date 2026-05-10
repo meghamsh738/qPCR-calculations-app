@@ -1,29 +1,66 @@
-/* Offline-first fonts: self-hosted so the app works without internet access.
-   Font files live in src/assets/fonts and are bundled by Vite. */
 @font-face {
-  font-family: 'Space Grotesk';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('./assets/fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Space Mono';
-  font-style: normal;
+  font-family: 'IBM Plex Sans';
+  src: url('./assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');
   font-weight: 400;
+  font-style: normal;
   font-display: swap;
-  src: url('./assets/fonts/SpaceMono-Regular.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: 'Space Mono';
+  font-family: 'IBM Plex Sans';
+  src: url('./assets/fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
-  font-weight: 700;
   font-display: swap;
-  src: url('./assets/fonts/SpaceMono-Bold.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('./assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('./assets/fonts/ibm-plex-sans-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('./assets/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('./assets/fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('./assets/fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('./assets/fonts/ibm-plex-mono-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 :root {
   --font-sans: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
   --font-display: var(--font-sans);
