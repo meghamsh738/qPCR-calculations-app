@@ -26,6 +26,7 @@ type LayoutRow = {
   Gene: string
   Type: string
   Label: string
+  SampleIndex?: number
   Replicate: number
   Group?: string
    Extras?: string[]
