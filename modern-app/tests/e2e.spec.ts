@@ -6,7 +6,10 @@ type PlanLayoutRow = {
   Gene: string
   Type: string
   Label: string
+  SampleIndex?: number
   Replicate: number
+  Group?: string
+  Extras?: string[]
 }
 
 type PlanSummaryRow = {
@@ -35,6 +38,43 @@ const waitForApi = async (request: { get: (url: string) => Promise<{ status: () 
     )
     .toBe(200)
 }
+
+test('API keeps repeated sample IDs as distinct sample occurrences', async ({ request }) => {
+  await waitForApi(request)
+
+  const res = await request.post('http://127.0.0.1:8003/plan', {
+    data: {
+      num_samples: 0,
+      num_standards: 0,
+      num_pos: 0,
+      replicates: 2,
+      overage_pct: 0,
+      place_gapdh_separate: false,
+      include_rtneg: false,
+      include_rnaneg: false,
+      use_pasted_samples: true,
+      pasted_samples: ['Mouse-7\tcontrol', 'Mouse-7\ttreated'],
+      genes: [{ name: 'Gapdh', chemistry: 'SYBR' }],
+      gene_plate_overrides: {}
+    }
+  })
+
+  expect(res.status()).toBe(200)
+  const json = (await res.json()) as PlanResponse
+  const sampleWells = json.layout.filter((row) => row.Type === 'Sample')
+
+  expect(sampleWells).toHaveLength(4)
+  expect(sampleWells.map((row) => row.Label)).toEqual(['Mouse-7', 'Mouse-7', 'Mouse-7', 'Mouse-7'])
+  expect(sampleWells.map((row) => row.Well)).toEqual(['A1', 'A2', 'A3', 'A4'])
+  expect(sampleWells.map((row) => row.SampleIndex)).toEqual([1, 1, 2, 2])
+  expect(sampleWells.map((row) => row.Group)).toEqual(['control', 'control', 'treated', 'treated'])
+  expect(sampleWells.map((row) => row.Extras)).toEqual([
+    ['control'],
+    ['control'],
+    ['treated'],
+    ['treated']
+  ])
+})
 
 test('API packs genes by chemistry and aligns each gene block to column 1', async ({ request }) => {
   await waitForApi(request)

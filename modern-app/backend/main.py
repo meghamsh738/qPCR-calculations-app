@@ -5,8 +5,9 @@ Ported from the legacy Tkinter helper: keeps placement rules, mix math, and expo
 
 import re
 from collections import defaultdict
+from dataclasses import dataclass
 from math import ceil
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -85,6 +86,15 @@ COMPACT_SAMPLE_RE = re.compile(
 )
 
 
+@dataclass(frozen=True)
+class ParsedSample:
+    """One input row, identified independently from its visible label."""
+
+    index: int
+    label: str
+    extras: Tuple[str, ...]
+
+
 def _split_sample_line(raw: str) -> List[str]:
     """Return tokens for a sample line.
 
@@ -120,18 +130,17 @@ def _split_sample_line(raw: str) -> List[str]:
     return parts
 
 
-def parse_samples(lines: List[str]) -> Tuple[List[str], Dict[str, str], Dict[str, List[str]], List[str]]:
+def parse_samples(lines: List[str]) -> Tuple[List[ParsedSample], List[str]]:
     """Parse pasted sample lines ->
-    (ordered names, name->group, name->extras[], headers_for_extras).
+    (ordered sample occurrences, headers_for_extras).
 
     - First token is always treated as the sample label.
     - Extras are every remaining token, preserving order.
+    - Repeated labels remain separate sample occurrences.
     - If only one extra column exists, it keeps the legacy name "Group".
     """
 
-    names: List[str] = []
-    group_map: Dict[str, str] = {}
-    extras_map: Dict[str, List[str]] = {}
+    samples: List[ParsedSample] = []
     max_extras = 0
 
     for ln in lines:
@@ -139,12 +148,7 @@ def parse_samples(lines: List[str]) -> Tuple[List[str], Dict[str, str], Dict[str
         if not parts:
             continue
         label, *extras = parts
-        if label in extras_map:
-            continue  # preserve first occurrence order
-        names.append(label)
-        extras_map[label] = extras
-        if extras:
-            group_map[label] = extras[0]
+        samples.append(ParsedSample(index=len(samples) + 1, label=label, extras=tuple(extras)))
         max_extras = max(max_extras, len(extras))
 
     if max_extras == 1:
@@ -152,7 +156,7 @@ def parse_samples(lines: List[str]) -> Tuple[List[str], Dict[str, str], Dict[str
     else:
         headers = [f"Extra {i}" for i in range(1, max_extras + 1)]
 
-    return names, group_map, extras_map, headers
+    return samples, headers
 
 @app.post("/plan")
 async def plan(req: PlanRequest):
@@ -163,13 +167,11 @@ async def plan(req: PlanRequest):
         raise HTTPException(status_code=400, detail="Replicates too large for 24 columns.")
 
     if req.use_pasted_samples:
-        samples, sample_group_map, sample_extra_map, sample_headers = parse_samples(req.pasted_samples)
+        samples, sample_headers = parse_samples(req.pasted_samples)
         if not samples:
             raise HTTPException(status_code=400, detail="No samples parsed from pasted list.")
     else:
-        samples = [f"S{i}" for i in range(1, req.num_samples + 1)]
-        sample_group_map = {}
-        sample_extra_map = {}
+        samples = [ParsedSample(index=i, label=f"S{i}", extras=()) for i in range(1, req.num_samples + 1)]
         sample_headers: List[str] = []
 
     max_extras = len(sample_headers)
@@ -285,15 +287,17 @@ async def plan(req: PlanRequest):
             col_idx = 0
             placed_for_gene = 0
 
-            def place_block(label_type: str, labels: List[str]):
+            def place_block(label_type: str, labels: List[Union[str, ParsedSample]]):
                 nonlocal row_idx, col_idx, placed_for_gene
-                for lab in labels:
+                for sample_or_label in labels:
                     if col_idx + req.replicates > WELLS_PER_ROW:
                         col_idx = 0
                         row_idx += 1
                     if row_idx >= len(PLATE_ROWS):
                         raise HTTPException(status_code=400, detail="Plate overflow while placing wells.")
-                    extras = sample_extra_map.get(lab, []) if label_type == "Sample" else []
+                    sample = sample_or_label if isinstance(sample_or_label, ParsedSample) else None
+                    lab = sample.label if sample else str(sample_or_label)
+                    extras = list(sample.extras) if sample else []
                     if len(extras) < max_extras:
                         extras = extras + [""] * (max_extras - len(extras))
                     for r in range(req.replicates):
@@ -306,8 +310,9 @@ async def plan(req: PlanRequest):
                             "Label": lab,
                             "Replicate": r + 1,
                         }
-                        if label_type == "Sample":
-                            record["Group"] = sample_group_map.get(lab, "")
+                        if sample:
+                            record["SampleIndex"] = sample.index
+                            record["Group"] = extras[0] if extras else ""
                             record["Extras"] = extras
                         all_layout.append(record)
                         plates_dict[current_plate].append(record)
