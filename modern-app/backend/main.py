@@ -7,7 +7,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from math import ceil
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Literal, Tuple, Union
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +19,7 @@ PLATE_ROWS = list("ABCDEFGHIJKLMNOP")  # 16 rows
 PLATE_COLS = list(range(1, 25))        # 24 cols
 WELLS_PER_ROW = len(PLATE_COLS)
 WELLS_PER_PLATE = len(PLATE_ROWS) * len(PLATE_COLS)  # 384
+PRIMER_CONCENTRATIONS_UM = {"stock": 100.0, "working": 10.0}
 
 class Gene(BaseModel):
     name: str
@@ -30,6 +31,7 @@ class PlanRequest(BaseModel):
     num_pos: int = 0
     replicates: int = 2
     overage_pct: float = 10.0
+    primer_source: Literal["stock", "working"] = "working"
     place_gapdh_separate: bool = False
     include_rtneg: bool = True
     include_rnaneg: bool = True
@@ -47,8 +49,9 @@ class MixRow(BaseModel):
     master_mix_2x: float
     rna_free_h2o: float
     probe_10uM: float
-    fwd_10uM: float
-    rev_10uM: float
+    primer_concentration_uM: float
+    fwd_primer_ul: float
+    rev_primer_ul: float
 
 CHEMISTRY = {
     "SYBR": {
@@ -332,6 +335,16 @@ async def plan(req: PlanRequest):
 
             factor = 1.0 + (req.overage_pct / 100.0)
             mix_equiv_rxn = placed_for_gene * factor
+            primer_concentration = PRIMER_CONCENTRATIONS_UM[req.primer_source]
+            # Preserve the primer dose in the existing 10 µM working recipe.
+            primer_scale = PRIMER_CONCENTRATIONS_UM["working"] / primer_concentration
+            forward = chem["10 µM Forward"] * primer_scale
+            reverse = chem["10 µM Reverse"] * primer_scale
+            water = (
+                chem["RNAse-free H2O"]
+                + chem["10 µM Forward"] + chem["10 µM Reverse"]
+                - forward - reverse
+            )
             all_mix.append({
                 "Gene": gene,
                 "Chemistry": gene_chem_key,
@@ -339,10 +352,11 @@ async def plan(req: PlanRequest):
                 "mix_factor": factor,
                 "mix_equiv_rxn": mix_equiv_rxn,
                 "master_mix_2x":  chem["2X master mix"]  * mix_equiv_rxn,
-                "rna_free_h2o":   chem["RNAse-free H2O"] * mix_equiv_rxn,
+                "rna_free_h2o":   water * mix_equiv_rxn,
                 "probe_10uM":     chem["10 µM probe"]    * mix_equiv_rxn,
-                "fwd_10uM":       chem["10 µM Forward"]  * mix_equiv_rxn,
-                "rev_10uM":       chem["10 µM Reverse"]  * mix_equiv_rxn,
+                "primer_concentration_uM": primer_concentration,
+                "fwd_primer_ul":  forward * mix_equiv_rxn,
+                "rev_primer_ul":  reverse * mix_equiv_rxn,
             })
 
     summary = [

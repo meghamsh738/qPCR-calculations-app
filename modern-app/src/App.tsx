@@ -41,9 +41,12 @@ type MixRow = {
   master_mix_2x: number
   rna_free_h2o: number
   probe_10uM: number
-  fwd_10uM: number
-  rev_10uM: number
+  primer_concentration_uM: number
+  fwd_primer_ul: number
+  rev_primer_ul: number
 }
+
+type PrimerSource = 'stock' | 'working'
 
 type SummaryRow = { plate: string; used: number; empty: number }
 
@@ -150,6 +153,7 @@ function App() {
   const [numPos, setNumPos] = useState(0)
   const [replicates, setReplicates] = useState(2)
   const [overagePct, setOveragePct] = useState(10)
+  const [primerSource, setPrimerSource] = useState<PrimerSource>('working')
   const [gapdhSeparate, setGapdhSeparate] = useState(false)
   const [includeRtNeg, setIncludeRtNeg] = useState(true)
   const [includeRnaNeg, setIncludeRnaNeg] = useState(true)
@@ -361,9 +365,9 @@ function App() {
     { key: 'mix_equiv_rxn', label: 'Mix eq (µL)', align: 'right' },
     { key: 'master_mix_2x', label: '2X mm (µL)', align: 'right' },
     { key: 'rna_free_h2o', label: 'H2O (µL)', align: 'right' },
-    { key: 'probe_10uM', label: 'Probe (µL)', align: 'right' },
-    { key: 'fwd_10uM', label: 'Fwd (µL)', align: 'right' },
-    { key: 'rev_10uM', label: 'Rev (µL)', align: 'right' }
+    { key: 'probe_10uM', label: 'Probe, 10 µM (µL)', align: 'right' },
+    { key: 'fwd_primer_ul', label: 'Fwd (µL)', align: 'right' },
+    { key: 'rev_primer_ul', label: 'Rev (µL)', align: 'right' }
   ]
 
   const genePalette = useMemo(() => {
@@ -415,6 +419,7 @@ function App() {
         num_pos: numPos,
         replicates,
         overage_pct: overagePct,
+        primer_source: primerSource,
         place_gapdh_separate: gapdhSeparate,
         include_rtneg: includeRtNeg,
         include_rnaneg: includeRnaNeg,
@@ -709,6 +714,17 @@ function App() {
               <span>Mix overage (%)</span>
               <input type="number" value={overagePct} onChange={(e) => setOveragePct(parseFloat(e.target.value || '0'))} />
             </label>
+            <label className="control">
+              <span>Primer solution</span>
+              <select
+                value={primerSource}
+                onChange={(e) => setPrimerSource(e.target.value as PrimerSource)}
+                data-testid="primer-source-select"
+              >
+                <option value="working">Working (10 µM)</option>
+                <option value="stock">Stock (100 µM)</option>
+              </select>
+            </label>
           </div>
 
           <div className="controls">
@@ -946,6 +962,11 @@ function App() {
           <div className="section-head"><div><p className="kicker">Master mix totals</p><h2>Per gene</h2></div></div>
           {mix.length === 0 && <div className="empty"><p className="muted">Compute to see mix totals.</p></div>}
           {mix.length > 0 && (
+            <p className="muted" data-testid="mix-primer-concentration">
+              Forward and reverse primer solution: {mix[0].primer_concentration_uM} µM.
+            </p>
+          )}
+          {mix.length > 0 && (
             <div className="table-wrap">
               <div className="table-scroll">
                 <table className="data mix-table">
@@ -965,10 +986,10 @@ function App() {
                         <td className="num">{m.mix_factor.toFixed(2)}</td>
                         <td className="num">{m.mix_equiv_rxn.toFixed(1)}</td>
                         <td className="num">{m.master_mix_2x.toFixed(1)}</td>
-                        <td className="num">{m.rna_free_h2o.toFixed(1)}</td>
+                        <td className="num">{m.rna_free_h2o.toFixed(2)}</td>
                         <td className="num">{m.probe_10uM.toFixed(2)}</td>
-                        <td className="num">{m.fwd_10uM.toFixed(2)}</td>
-                        <td className="num">{m.rev_10uM.toFixed(2)}</td>
+                        <td className="num">{m.fwd_primer_ul.toFixed(2)}</td>
+                        <td className="num">{m.rev_primer_ul.toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>

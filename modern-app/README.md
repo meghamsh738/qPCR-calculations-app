@@ -24,6 +24,12 @@ Extra captures (full-page + closeups): `screenshots/example_run.png`, `screensho
 - Outputs: interactive table, TSV copy, CSV/Excel export hooks, per-gene master-mix volumes.
 - Paste samples with multiple columns (tab/comma/space). First token is the label; all remaining columns render in the output table.
 
+### Primer solutions
+
+Choose **Working (10 µM)** or **Stock (100 µM)** under Genes & controls, then compute the layout. This setting applies to both forward and reverse primers for every gene. The existing primer dose is preserved: each reaction uses 0.30 µL per primer from a working solution or 0.03 µL per primer from stock. Water fills the difference so the reaction volume stays the same. TaqMan probes retain their separate 10 µM recipe.
+
+The master-mix results show the primer concentration used in that calculation. Changing the selector requires computing again. API requests use `primer_source` (`working` by default or `stock`); mix rows return `primer_concentration_uM`, `fwd_primer_ul`, and `rev_primer_ul` instead of the old concentration-specific primer volume keys.
+
 ## Setup (D:)
 ```bash
 cd "<PROJECTS_DIR>/qpcr-calculations-app-git/modern-app"
