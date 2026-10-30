@@ -452,9 +452,9 @@ function App() {
     }
   }
 
-  const copyTSV = () => {
+  const copyTSV = async () => {
     if (!layout.length) return
-    const headers = ['Well', 'Gene', 'Type', 'Label', ...sampleHeaders, 'Replicate', 'Plate']
+    const headers = ['Well', 'Gene', 'Type', 'Label', 'Sample #', ...sampleHeaders, 'Replicate', 'Plate']
     const lines = [headers.join('\t')]
     layout.forEach(r => {
       const extras = sampleHeaders.map((_, idx) => r.Extras?.[idx] ?? '')
@@ -463,14 +463,20 @@ function App() {
         r.Gene,
         r.Type,
         r.Label,
+        r.SampleIndex ?? '',
         ...extras,
         r.Replicate,
         r.Plate
       ]
       lines.push(row.join('\t'))
     })
-    navigator.clipboard.writeText(lines.join('\n'))
-    alert('Layout copied to clipboard (TSV).')
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'))
+      setError(null)
+      alert('Layout copied to clipboard (TSV).')
+    } catch {
+      setError('Could not copy the layout. Allow clipboard access and try again.')
+    }
   }
 
   const geneCount = genes.filter(g => g.name.trim()).length
@@ -925,7 +931,7 @@ function App() {
                 <table className="data layout-table">
                   <thead>
                     <tr>
-                      {['Well','Gene','Type','Label', ...sampleHeaders, 'Replicate','Plate'].map(h => <th key={h}>{h}</th>)}
+                      {['Well','Gene','Type','Label','Sample #', ...sampleHeaders, 'Replicate','Plate'].map(h => <th key={h} scope="col" title={h === 'Sample #' ? 'Position in the input sample list. Repeated labels keep separate numbers.' : undefined}>{h}</th>)}
                     </tr>
                   </thead>
                   <tbody>
@@ -938,6 +944,7 @@ function App() {
                           {row.Type}
                         </td>
                         <td>{row.Label}</td>
+                        <td className="num">{row.SampleIndex ?? ''}</td>
                         {sampleHeaders.map((h, hIdx) => (
                           <td key={`${idx}-${h}`}>{row.Extras?.[hIdx] ?? ''}</td>
                         ))}

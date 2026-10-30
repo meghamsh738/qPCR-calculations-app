@@ -229,8 +229,8 @@ test('pasted samples keep extra columns in output table', async ({ page, request
   await page.getByTestId('calculate-btn').click()
 
   await expect(page.getByRole('cell', { name: 'Plate 1' }).first()).toBeVisible({ timeout: 10000 })
-  await expect(page.getByRole('cell', { name: 'Extra 1' })).toBeVisible()
-  await expect(page.getByRole('cell', { name: 'Extra 3' })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: 'Extra 1' })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: 'Extra 3' })).toBeVisible()
 
   // The first sample row should surface the extra fields in order.
   await expect(page.getByRole('cell', { name: 'Male' }).first()).toBeVisible()
