@@ -1,0 +1,567 @@
+{
+  "kind": "easylab-next:qpcr-planner:experiment",
+  "version": 1,
+  "name": "Fictional Planner QA",
+  "savedAt": "2026-11-17T17:22:50.811Z",
+  "planFingerprint": "{\"num_samples\":0,\"num_standards\":0,\"num_pos\":0,\"replicates\":1,\"overage_pct\":10,\"primer_source\":\"working\",\"place_gapdh_separate\":false,\"include_rtneg\":false,\"include_rnaneg\":false,\"experiment_id\":\"exp-351ae608-185c-4a31-a418-28dd3af330d2\",\"use_pasted_samples\":true,\"pasted_samples\":[\"Mouse-7\\tcontrol\",\"Mouse-7\\ttreated\"],\"genes\":[{\"name\":\"Tnf\",\"chemistry\":\"TaqMan\"},{\"name\":\"Ccl2\",\"chemistry\":\"SYBR\"},{\"name\":\"Il1b\",\"chemistry\":\"SYBR\"},{\"name\":\"Gapdh\",\"chemistry\":\"SYBR\"}],\"gene_plate_overrides\":{},\"plate_format\":384,\"recipes\":{\"SYBR\":{\"version\":1,\"name\":\"Fictional QA preset\",\"total_volume_ul\":15,\"reference_volume_ul\":15,\"allow_scaling\":false,\"min_pipette_ul\":0.5,\"overage_pct\":10,\"sample_input\":{\"mode\":\"mass\",\"value\":100,\"unit\":\"ng\"},\"constraints\":{\"source\":\"\",\"min_volume_ul\":null,\"max_volume_ul\":null,\"max_input_ng\":null,\"max_sample_ul\":null},\"components\":[{\"name\":\"2X master mix\",\"mode\":\"concentration\",\"value\":0,\"stock\":2,\"stock_unit\":\"X\",\"final\":1,\"final_unit\":\"X\",\"in_master_mix\":true},{\"name\":\"Forward primer\",\"mode\":\"concentration\",\"value\":0,\"stock\":10,\"stock_unit\":\"uM\",\"final\":0.2,\"final_unit\":\"uM\",\"in_master_mix\":true},{\"name\":\"Reverse primer\",\"mode\":\"concentration\",\"value\":0,\"stock\":10,\"stock_unit\":\"uM\",\"final\":0.2,\"final_unit\":\"uM\",\"in_master_mix\":true},{\"name\":\"Fictional reagent\",\"mode\":\"fixed\",\"value\":0.2,\"stock\":1,\"stock_unit\":\"uM\",\"final\":0,\"final_unit\":\"uM\",\"in_master_mix\":true}]},\"TaqMan\":{\"version\":1,\"name\":\"Legacy TaqMan — 15 µL · 10 µM primers\",\"total_volume_ul\":15,\"reference_volume_ul\":15,\"allow_scaling\":false,\"min_pipette_ul\":0.5,\"overage_pct\":10,\"sample_input\":{\"mode\":\"volume\",\"value\":2,\"unit\":\"uL\"},\"constraints\":{\"source\":\"\",\"min_volume_ul\":null,\"max_volume_ul\":null,\"max_input_ng\":null,\"max_sample_ul\":null},\"components\":[{\"name\":\"2X master mix\",\"mode\":\"concentration\",\"value\":0,\"stock\":2,\"stock_unit\":\"X\",\"final\":1,\"final_unit\":\"X\",\"in_master_mix\":true},{\"name\":\"Forward primer\",\"mode\":\"concentration\",\"value\":0,\"stock\":10,\"stock_unit\":\"uM\",\"final\":0.2,\"final_unit\":\"uM\",\"in_master_mix\":true},{\"name\":\"Reverse primer\",\"mode\":\"concentration\",\"value\":0,\"stock\":10,\"stock_unit\":\"uM\",\"final\":0.2,\"final_unit\":\"uM\",\"in_master_mix\":true},{\"name\":\"Probe\",\"mode\":\"concentration\",\"value\":0,\"stock\":10,\"stock_unit\":\"uM\",\"final\":0.2,\"final_unit\":\"uM\",\"in_master_mix\":true}]}},\"sample_concentration_ng_ul\":50,\"template_available_ul\":{\"exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00001\":\"8\"}}",
+  "settings": {
+    "experimentId": "exp-351ae608-185c-4a31-a418-28dd3af330d2",
+    "plateFormat": 384,
+    "numSamples": 0,
+    "numStandards": 0,
+    "numPos": 0,
+    "replicates": 1,
+    "overagePct": 10,
+    "primerSource": "working",
+    "gapdhSeparate": false,
+    "includeRtNeg": false,
+    "includeRnaNeg": false,
+    "usePasted": true,
+    "sampleText": "Mouse-7\tcontrol\nMouse-7\ttreated",
+    "sampleConcentration": "50",
+    "templateAvailableUl": {
+      "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00001": "8"
+    },
+    "genes": [
+      {
+        "id": 1,
+        "name": "Tnf",
+        "chemistry": "TaqMan"
+      },
+      {
+        "id": 2,
+        "name": "Ccl2",
+        "chemistry": "SYBR"
+      },
+      {
+        "id": 3,
+        "name": "Il1b",
+        "chemistry": "SYBR"
+      },
+      {
+        "id": 4,
+        "name": "Gapdh",
+        "chemistry": "SYBR"
+      }
+    ],
+    "recipesByChemistry": {
+      "SYBR": {
+        "version": 1,
+        "name": "Fictional QA preset",
+        "total_volume_ul": 15,
+        "reference_volume_ul": 15,
+        "allow_scaling": false,
+        "min_pipette_ul": 0.5,
+        "overage_pct": 10,
+        "sample_input": {
+          "mode": "mass",
+          "value": 100,
+          "unit": "ng"
+        },
+        "constraints": {
+          "source": "",
+          "min_volume_ul": null,
+          "max_volume_ul": null,
+          "max_input_ng": null,
+          "max_sample_ul": null
+        },
+        "components": [
+          {
+            "name": "2X master mix",
+            "mode": "concentration",
+            "value": 0,
+            "stock": 2,
+            "stock_unit": "X",
+            "final": 1,
+            "final_unit": "X",
+            "in_master_mix": true
+          },
+          {
+            "name": "Forward primer",
+            "mode": "concentration",
+            "value": 0,
+            "stock": 10,
+            "stock_unit": "uM",
+            "final": 0.2,
+            "final_unit": "uM",
+            "in_master_mix": true
+          },
+          {
+            "name": "Reverse primer",
+            "mode": "concentration",
+            "value": 0,
+            "stock": 10,
+            "stock_unit": "uM",
+            "final": 0.2,
+            "final_unit": "uM",
+            "in_master_mix": true
+          },
+          {
+            "name": "Fictional reagent",
+            "mode": "fixed",
+            "value": 0.2,
+            "stock": 1,
+            "stock_unit": "uM",
+            "final": 0,
+            "final_unit": "uM",
+            "in_master_mix": true
+          }
+        ]
+      },
+      "TaqMan": {
+        "version": 1,
+        "name": "Legacy TaqMan — 15 µL · 10 µM primers",
+        "total_volume_ul": 15,
+        "reference_volume_ul": 15,
+        "allow_scaling": false,
+        "min_pipette_ul": 0.5,
+        "overage_pct": 10,
+        "sample_input": {
+          "mode": "volume",
+          "value": 2,
+          "unit": "uL"
+        },
+        "constraints": {
+          "source": "",
+          "min_volume_ul": null,
+          "max_volume_ul": null,
+          "max_input_ng": null,
+          "max_sample_ul": null
+        },
+        "components": [
+          {
+            "name": "2X master mix",
+            "mode": "concentration",
+            "value": 0,
+            "stock": 2,
+            "stock_unit": "X",
+            "final": 1,
+            "final_unit": "X",
+            "in_master_mix": true
+          },
+          {
+            "name": "Forward primer",
+            "mode": "concentration",
+            "value": 0,
+            "stock": 10,
+            "stock_unit": "uM",
+            "final": 0.2,
+            "final_unit": "uM",
+            "in_master_mix": true
+          },
+          {
+            "name": "Reverse primer",
+            "mode": "concentration",
+            "value": 0,
+            "stock": 10,
+            "stock_unit": "uM",
+            "final": 0.2,
+            "final_unit": "uM",
+            "in_master_mix": true
+          },
+          {
+            "name": "Probe",
+            "mode": "concentration",
+            "value": 0,
+            "stock": 10,
+            "stock_unit": "uM",
+            "final": 0.2,
+            "final_unit": "uM",
+            "in_master_mix": true
+          }
+        ]
+      }
+    },
+    "layout": [
+      {
+        "Plate": "Plate 1",
+        "Well": "A1",
+        "Gene": "Tnf",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 1,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00001",
+        "Group": "control",
+        "Extras": [
+          "control"
+        ]
+      },
+      {
+        "Plate": "Plate 1",
+        "Well": "A2",
+        "Gene": "Tnf",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 2,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00002",
+        "Group": "treated",
+        "Extras": [
+          "treated"
+        ]
+      },
+      {
+        "Plate": "Plate 1",
+        "Well": "A3",
+        "Gene": "Tnf",
+        "Type": "Blank",
+        "Label": "Blank",
+        "Replicate": 1
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "A1",
+        "Gene": "Ccl2",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 1,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00001",
+        "Group": "control",
+        "Extras": [
+          "control"
+        ]
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "A2",
+        "Gene": "Ccl2",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 2,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00002",
+        "Group": "treated",
+        "Extras": [
+          "treated"
+        ]
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "A3",
+        "Gene": "Ccl2",
+        "Type": "Blank",
+        "Label": "Blank",
+        "Replicate": 1
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "B1",
+        "Gene": "Il1b",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 1,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00001",
+        "Group": "control",
+        "Extras": [
+          "control"
+        ]
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "B2",
+        "Gene": "Il1b",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 2,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00002",
+        "Group": "treated",
+        "Extras": [
+          "treated"
+        ]
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "B3",
+        "Gene": "Il1b",
+        "Type": "Blank",
+        "Label": "Blank",
+        "Replicate": 1
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "C1",
+        "Gene": "Gapdh",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 1,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00001",
+        "Group": "control",
+        "Extras": [
+          "control"
+        ]
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "C2",
+        "Gene": "Gapdh",
+        "Type": "Sample",
+        "Label": "Mouse-7",
+        "Replicate": 1,
+        "SampleIndex": 2,
+        "SampleId": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00002",
+        "Group": "treated",
+        "Extras": [
+          "treated"
+        ]
+      },
+      {
+        "Plate": "Plate 2",
+        "Well": "C3",
+        "Gene": "Gapdh",
+        "Type": "Blank",
+        "Label": "Blank",
+        "Replicate": 1
+      }
+    ],
+    "mix": [
+      {
+        "Gene": "Tnf",
+        "Chemistry": "TaqMan",
+        "placed_reactions": 3,
+        "mix_factor": 1.1,
+        "mix_equiv_rxn": 3.3000000000000003,
+        "master_mix_2x": 24.750000000000004,
+        "rna_free_h2o": 15.18,
+        "probe_10uM": 0.99,
+        "primer_concentration_uM": 10,
+        "fwd_primer_ul": 0.99,
+        "rev_primer_ul": 0.99,
+        "recipe_name": "Legacy TaqMan — 15 µL · 10 µM primers",
+        "reaction_volume_ul": 15,
+        "sample_volume_ul": 2,
+        "water_per_reaction_ul": 4.6,
+        "components": [
+          {
+            "name": "2X master mix",
+            "per_reaction_ul": 7.5,
+            "total_ul": 24.750000000000004
+          },
+          {
+            "name": "Forward primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Reverse primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Probe",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Water",
+            "per_reaction_ul": 4.6,
+            "total_ul": 15.18
+          }
+        ],
+        "individual_transfers": [],
+        "recipe_issues": [],
+        "dilutions": []
+      },
+      {
+        "Gene": "Ccl2",
+        "Chemistry": "SYBR",
+        "placed_reactions": 3,
+        "mix_factor": 1.1,
+        "mix_equiv_rxn": 3.3000000000000003,
+        "master_mix_2x": 24.750000000000004,
+        "rna_free_h2o": 15.510000000000005,
+        "probe_10uM": 0,
+        "primer_concentration_uM": 10,
+        "fwd_primer_ul": 0.99,
+        "rev_primer_ul": 0.99,
+        "recipe_name": "Fictional QA preset",
+        "reaction_volume_ul": 15,
+        "sample_volume_ul": 2,
+        "water_per_reaction_ul": 4.700000000000001,
+        "components": [
+          {
+            "name": "2X master mix",
+            "per_reaction_ul": 7.5,
+            "total_ul": 24.750000000000004
+          },
+          {
+            "name": "Forward primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Reverse primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Fictional reagent",
+            "per_reaction_ul": 0.2,
+            "total_ul": 0.6600000000000001
+          },
+          {
+            "name": "Water",
+            "per_reaction_ul": 4.700000000000001,
+            "total_ul": 15.510000000000005
+          }
+        ],
+        "individual_transfers": [],
+        "recipe_issues": [],
+        "dilutions": []
+      },
+      {
+        "Gene": "Il1b",
+        "Chemistry": "SYBR",
+        "placed_reactions": 3,
+        "mix_factor": 1.1,
+        "mix_equiv_rxn": 3.3000000000000003,
+        "master_mix_2x": 24.750000000000004,
+        "rna_free_h2o": 15.510000000000005,
+        "probe_10uM": 0,
+        "primer_concentration_uM": 10,
+        "fwd_primer_ul": 0.99,
+        "rev_primer_ul": 0.99,
+        "recipe_name": "Fictional QA preset",
+        "reaction_volume_ul": 15,
+        "sample_volume_ul": 2,
+        "water_per_reaction_ul": 4.700000000000001,
+        "components": [
+          {
+            "name": "2X master mix",
+            "per_reaction_ul": 7.5,
+            "total_ul": 24.750000000000004
+          },
+          {
+            "name": "Forward primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Reverse primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Fictional reagent",
+            "per_reaction_ul": 0.2,
+            "total_ul": 0.6600000000000001
+          },
+          {
+            "name": "Water",
+            "per_reaction_ul": 4.700000000000001,
+            "total_ul": 15.510000000000005
+          }
+        ],
+        "individual_transfers": [],
+        "recipe_issues": [],
+        "dilutions": []
+      },
+      {
+        "Gene": "Gapdh",
+        "Chemistry": "SYBR",
+        "placed_reactions": 3,
+        "mix_factor": 1.1,
+        "mix_equiv_rxn": 3.3000000000000003,
+        "master_mix_2x": 24.750000000000004,
+        "rna_free_h2o": 15.510000000000005,
+        "probe_10uM": 0,
+        "primer_concentration_uM": 10,
+        "fwd_primer_ul": 0.99,
+        "rev_primer_ul": 0.99,
+        "recipe_name": "Fictional QA preset",
+        "reaction_volume_ul": 15,
+        "sample_volume_ul": 2,
+        "water_per_reaction_ul": 4.700000000000001,
+        "components": [
+          {
+            "name": "2X master mix",
+            "per_reaction_ul": 7.5,
+            "total_ul": 24.750000000000004
+          },
+          {
+            "name": "Forward primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Reverse primer",
+            "per_reaction_ul": 0.3,
+            "total_ul": 0.99
+          },
+          {
+            "name": "Fictional reagent",
+            "per_reaction_ul": 0.2,
+            "total_ul": 0.6600000000000001
+          },
+          {
+            "name": "Water",
+            "per_reaction_ul": 4.700000000000001,
+            "total_ul": 15.510000000000005
+          }
+        ],
+        "individual_transfers": [],
+        "recipe_issues": [],
+        "dilutions": []
+      }
+    ],
+    "summary": [
+      {
+        "plate": "Plate 1",
+        "used": 3,
+        "empty": 381
+      },
+      {
+        "plate": "Plate 2",
+        "used": 9,
+        "empty": 375
+      }
+    ],
+    "templateBudget": {
+      "rows": [
+        {
+          "sample_id": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00001",
+          "label": "Mouse-7",
+          "group": "control",
+          "well_count": 4,
+          "assays": [
+            "Tnf",
+            "Ccl2",
+            "Il1b",
+            "Gapdh"
+          ],
+          "required_ul": 8,
+          "available_ul": 8,
+          "status": "enough",
+          "issues": []
+        },
+        {
+          "sample_id": "exp-351ae608-185c-4a31-a418-28dd3af330d2:SAMPLE-00002",
+          "label": "Mouse-7",
+          "group": "treated",
+          "well_count": 4,
+          "assays": [
+            "Tnf",
+            "Ccl2",
+            "Il1b",
+            "Gapdh"
+          ],
+          "required_ul": 8,
+          "available_ul": null,
+          "status": "unknown",
+          "issues": []
+        }
+      ],
+      "issues": [],
+      "unknown_count": 1
+    },
+    "planReviewConfirmed": true,
+    "sampleHeaders": [
+      "Group"
+    ],
+    "plateFilter": "Plate 1"
+  }
+}

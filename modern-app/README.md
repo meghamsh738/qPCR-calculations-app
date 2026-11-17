@@ -1,11 +1,29 @@
-# qPCR Calculations (React + FastAPI)
+# qPCR Planner (EasyLab Next branch)
+
+## Current Next development route
+
+From the module root, run `npm run dev`. The guarded launcher uses the isolated Next Planner Python environment and binds the UI to `127.0.0.1:19512` and the API to `127.0.0.1:18512`; it verifies that the API identifies itself as the Next qPCR Planner before Vite starts.
+
+The Planner supports editable SYBR/TaqMan recipes, sample mass or volume input, kit-sourced limits, pipetting preferences, working dilutions, 96- and 384-well layouts, and versioned local experiment packages. A final TSV or qPCR Analysis handoff requires a current computed layout, no recipe/transfer issues, and an explicit review of sample IDs, recipe and layout. The master-mix table and its TSV/CSV exports use every calculated recipe component and identify whether preparation overage is included.
+
+Phase 3 design and QA record: [qPCR Planner review](../design-review/next-calculators-phase-3/README.md).
+
+Sample input starts empty. The Planner does not insert placeholder samples into a new plan.
+
+In the browser build, saved packages and presets stay in the browser profile’s local storage, and exported files go to the browser’s configured download location. The browser build does not require folder setup.
+
+For qPCR Analysis, load the handoff CSV as sample information and match instrument wells by **Plate and Well**. The Cq column is intentionally blank for Analysis to fill from the instrument file.
+
+Run the isolated checks with `npm run build`, `npm run lint`, and `npm --prefix modern-app run test:e2e`. Python planner tests use the Next `qpcr-planner` environment.
+
+## Historical interface reference (original build)
 
 Paste samples, pick genes/chemistry/replicates, add controls/overage, and get multi-plate 384-well layouts plus master-mix totals. Styling matches the lab notebook neo-brutalist system. Screenshots below come from a Playwright run (Dec 28, 2025) using 80 samples to force multiple plates; Plate 2 is selected in the preview.
 
 Part of **Easylab Suite**: this repo is bundled as the **qPCR Planner** module (`qpcr-planner`).
 License: All Rights Reserved.
 
-Latest captures (Playwright run, 80 samples, multi-plate):
+Historical screenshots (80 samples, multi-plate):
 
 | Plan view | Plate preview | Output table | Master mix | Notes |
 | --- | --- | --- | --- | --- |
@@ -30,22 +48,11 @@ Choose **Working (10 µM)** or **Stock (100 µM)** under Genes & controls, then 
 
 The master-mix results show the primer concentration used in that calculation. Changing the selector requires computing again. API requests use `primer_source` (`working` by default or `stock`); mix rows return `primer_concentration_uM`, `fwd_primer_ul`, and `rev_primer_ul` instead of the old concentration-specific primer volume keys.
 
-## Setup (D:)
-```bash
-cd "<PROJECTS_DIR>/qpcr-calculations-app-git/modern-app"
-# If npm install fails on NTFS, run in WSL home and copy node_modules back.
-npm install
-python3 -m venv .venv
-./.venv/bin/pip install --break-system-packages -r backend/requirements.txt
-```
+### Historical original module setup and installer notes
 
-## Run (dev)
-```bash
-npm run dev:full   # front :5176, API :8003
-```
-Open http://localhost:5176 and click **Compute layout** (or mock `/plan` if you just want UI).
+The following instructions describe the original module, not the guarded Next launcher above. They do not launch or install the EasyLab Next Planner.
 
-## Desktop Installer (Windows)
+#### Original desktop installer (Windows, historical)
 From the repo root (one level above `modern-app`):
 
 ```bash
@@ -65,7 +72,7 @@ Notes:
 - Prompt: "Convert my table to CSV with headers: Sample, Conc. Keep values intact, no invented data, output UTF-8 CSV text only."
 - Save as `samples.csv` and paste or upload. Visual helper: `screenshots/data-format-helper.svg`.
 
-## Tests & screenshots
+#### Original tests & screenshots
 ```bash
 npx playwright install chromium   # once
 npm run test:e2e                  # basic smoke

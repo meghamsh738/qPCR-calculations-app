@@ -1,0 +1,22 @@
+{
+  "actualMetadataJoinChecked": true,
+  "source": "work/calculators-phase-3/planner-qa/planner-96-analysis-handoff.csv",
+  "rows": 12,
+  "biologicalSamples": 2,
+  "assays": 4,
+  "plates": 2,
+  "mapping": {
+    "Plate": "Plate",
+    "Well": "Well",
+    "Gene": "Gene",
+    "Label": "Label",
+    "Cq": "Cq",
+    "Type": "Type",
+    "Group": "Group",
+    "SampleId": "SampleId",
+    "PairId": "",
+    "Tissue": "",
+    "Batch": ""
+  },
+  "details": "header row 1"
+}

@@ -1,7 +1,19 @@
 import { defineConfig, devices } from '@playwright/test'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const moduleRoot = path.resolve(__dirname, '..')
+const moduleRequire = createRequire(import.meta.url)
+const runtime = moduleRequire(path.join(moduleRoot, 'desktop', 'electron', 'next-runtime.cjs'))
+const runtimeLayout = runtime.resolveRuntimeLayout({ projectRoot: moduleRoot })
+process.env.PLAYWRIGHT_BROWSERS_PATH = runtime.assertNoSymlinkPathComponents(runtimeLayout.browserCachePath)
+runtime.assertNoSymlinkPathComponents(runtimeLayout.browserTestOutputPath)
 
 export default defineConfig({
   testDir: './tests',
+  outputDir: runtimeLayout.browserTestOutputPath,
   timeout: 120_000,
   fullyParallel: true,
   expect: {
@@ -9,7 +21,7 @@ export default defineConfig({
     toHaveScreenshot: { animations: 'disabled', caret: 'hide' }
   },
   use: {
-    baseURL: 'http://localhost:5176',
+    baseURL: 'http://127.0.0.1:19512',
     trace: 'on-first-retry',
     viewport: { width: 1440, height: 900 },
     colorScheme: 'light',
@@ -18,8 +30,8 @@ export default defineConfig({
   },
   webServer: {
     // Spin up both frontend (Vite) and backend (FastAPI) so the flow can hit /plan without manual servers.
-    command: "bash -lc 'set -e; trap \"kill 0\" EXIT; npm run dev:back & npm run dev:front'",
-    url: 'http://localhost:5176',
+    command: 'npm run dev:full',
+    url: 'http://127.0.0.1:19512',
     reuseExistingServer: false,
     timeout: 120_000,
     stdout: 'ignore'

@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "mix_rows": 20,
+  "custom_assays": 3,
+  "handoff_rows": 12,
+  "sample_ids": 2,
+  "assays": [
+    "Ccl2",
+    "Gapdh",
+    "Il1b",
+    "Tnf"
+  ]
+}

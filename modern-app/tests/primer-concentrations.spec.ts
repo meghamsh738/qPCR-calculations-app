@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-const apiUrl = 'http://127.0.0.1:8003/plan'
+const apiUrl = 'http://127.0.0.1:18512/plan'
 const planInputs = {
   num_samples: 4,
   num_standards: 0,
@@ -69,8 +69,8 @@ test('primer selector updates computed concentrations and displayed volumes', as
     if (message.type() === 'error') errors.push(message.text())
   })
   await page.goto('/')
-  await expect(page).toHaveURL('http://localhost:5176/')
-  await expect(page).toHaveTitle('modern-app')
+  await expect(page).toHaveURL('http://127.0.0.1:19512/')
+  await expect(page).toHaveTitle('qPCR Planner · EasyLab Next')
   await expect(page.getByRole('heading', { name: 'qPCR plate plans without guesswork' })).toBeVisible()
   if (await page.getByTestId('setup-overlay').isVisible()) {
     await page.getByTestId('setup-finish').click()
@@ -85,30 +85,24 @@ test('primer selector updates computed concentrations and displayed volumes', as
   const selector = page.getByRole('combobox', { name: 'Primer solution' })
   await expect(selector).toHaveValue('working')
   const masterCard = page.getByTestId('master-card')
-  const sybrRow = masterCard.getByRole('row').filter({ has: page.getByRole('cell', { name: 'Ccl2', exact: true }) })
-  const taqRow = masterCard.getByRole('row').filter({ has: page.getByRole('cell', { name: 'Tnf', exact: true }) })
+  const sybrPrimerRow = masterCard.getByRole('row').filter({ has: page.getByRole('cell', { name: 'Ccl2', exact: true }) }).filter({ hasText: 'Forward primer' })
+  const taqPrimerRow = masterCard.getByRole('row').filter({ has: page.getByRole('cell', { name: 'Tnf', exact: true }) }).filter({ hasText: 'Forward primer' })
 
   for (const source of ['working', 'stock', 'working']) {
     await selector.selectOption(source)
     if (source === 'stock') {
-      // Existing results keep their calculated concentration until recomputed.
-      await expect(page.getByTestId('mix-primer-concentration')).toHaveText('Forward and reverse primer solution: 10 µM.')
+      // Existing totals stay tied to the previous working-solution calculation until recomputed.
+      await expect(sybrPrimerRow.locator('td').nth(5)).toHaveText('0.900')
     }
     const responsePromise = page.waitForResponse(response => response.url() === apiUrl && response.request().method() === 'POST')
     await page.getByTestId('calculate-btn').click()
     const response = await responsePromise
     expect(response.status()).toBe(200)
     expect(response.request().postDataJSON().primer_source).toBe(source)
-    const concentration = source === 'stock' ? 100 : 10
-    await expect(page.getByTestId('mix-primer-concentration')).toHaveText(`Forward and reverse primer solution: ${concentration} µM.`)
-    await expect(sybrRow.getByRole('cell')).toHaveText([
-      'Ccl2', 'SYBR', '3', '1.00', '3.0', '22.5', source === 'stock' ? '16.32' : '14.70', '0.00',
-      source === 'stock' ? '0.09' : '0.90', source === 'stock' ? '0.09' : '0.90',
-    ])
-    await expect(taqRow.getByRole('cell')).toHaveText([
-      'Tnf', 'TaqMan', '3', '1.00', '3.0', '22.5', source === 'stock' ? '15.42' : '13.80', '0.90',
-      source === 'stock' ? '0.09' : '0.90', source === 'stock' ? '0.09' : '0.90',
-    ])
+    await expect(sybrPrimerRow.locator('td').nth(4)).toHaveText(source === 'stock' ? '0.0300' : '0.3000')
+    await expect(sybrPrimerRow.locator('td').nth(5)).toHaveText(source === 'stock' ? '0.090' : '0.900')
+    await expect(taqPrimerRow.locator('td').nth(4)).toHaveText(source === 'stock' ? '0.0300' : '0.3000')
+    await expect(taqPrimerRow.locator('td').nth(5)).toHaveText(source === 'stock' ? '0.090' : '0.900')
     await masterCard.screenshot({ path: testInfo.outputPath(`${source}-primers.png`) })
     if (source === 'stock') {
       await page.getByTestId('genes-card').screenshot({ path: testInfo.outputPath('stock-selector.png') })
@@ -119,7 +113,7 @@ test('primer selector updates computed concentrations and displayed volumes', as
   const mobileResponsePromise = page.waitForResponse(response => response.url() === apiUrl && response.request().method() === 'POST')
   await page.getByTestId('calculate-btn').click()
   expect((await mobileResponsePromise).status()).toBe(200)
-  await expect(page.getByTestId('mix-primer-concentration')).toHaveText('Forward and reverse primer solution: 100 µM.')
+  await expect(sybrPrimerRow.locator('td').nth(4)).toHaveText('0.0300')
   await page.getByTestId('genes-card').screenshot({ path: testInfo.outputPath('mobile-selector.png') })
   await expect(page.locator('vite-error-overlay')).toHaveCount(0)
   expect(errors).toEqual([])

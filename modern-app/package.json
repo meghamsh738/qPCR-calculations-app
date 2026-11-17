@@ -1,17 +1,18 @@
 {
-  "name": "qpcr-calculations-app",
+  "name": "qpcr-calculations-next",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.3.0-dev.3",
   "type": "module",
   "scripts": {
-    "dev": "node ./node_modules/vite/bin/vite.js --host --port 5176",
-    "dev:front": "node ./node_modules/vite/bin/vite.js --host --port 5176",
-    "dev:back": "bash -lc 'set -e; VENV=\"backend/.venv\"; PY=\"$VENV/bin/python\"; if [ ! -x \"$PY\" ]; then python3 -m venv \"$VENV\"; \"$PY\" -m pip install -r backend/requirements.txt; fi; \"$PY\" -m uvicorn backend.main:app --reload --port 8003'",
-    "dev:full": "node ./node_modules/concurrently/dist/bin/concurrently.js -k -s first -n front,api \"npm:dev:front\" \"npm:dev:back\"",
+    "dev": "node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 19512 --strictPort",
+    "dev:front": "node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 19512 --strictPort",
+    "dev:back": "node ./scripts/run-next-backend.cjs",
+    "dev:full": "node ./scripts/dev-next.cjs",
     "build": "node ./node_modules/typescript/bin/tsc -b && node ./node_modules/vite/bin/vite.js build",
     "lint": "node ./node_modules/eslint/bin/eslint.js .",
-    "preview": "node ./node_modules/vite/bin/vite.js preview",
+    "preview": "node ./node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 19512 --strictPort",
     "test:e2e": "node ./node_modules/@playwright/test/cli.js test",
+    "test:runtime": "node --test ../desktop/electron/next-runtime.test.cjs",
     "test:e2e:headed": "PLAYWRIGHT_HEADLESS=0 node ./node_modules/@playwright/test/cli.js test"
   },
   "dependencies": {

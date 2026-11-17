@@ -16,7 +16,7 @@ const payload = {
 
 for (const primer_source of ['working', 'stock']) {
   test(`repeated entries retain their identity across chemistries with ${primer_source} primers`, async ({ request }) => {
-    const response = await request.post('http://127.0.0.1:8003/plan', { data: { ...payload, primer_source } })
+    const response = await request.post('http://127.0.0.1:18512/plan', { data: { ...payload, primer_source } })
     expect(response.status()).toBe(200)
     const plan = await response.json()
     expect(plan.summary).toHaveLength(2)
@@ -45,7 +45,6 @@ test('table and copied TSV distinguish identical labels and preserve input order
   await page.getByLabel('Replicates', { exact: true }).fill('2')
   await page.getByLabel('Include RT−', { exact: true }).uncheck()
   await page.getByLabel('Include RNA−', { exact: true }).uncheck()
-  await page.getByRole('combobox', { name: 'Primer solution' }).selectOption('stock')
   const calculated = page.waitForResponse(r => r.url().endsWith('/plan') && r.request().method() === 'POST')
   await page.getByTestId('calculate-btn').click()
   expect((await calculated).status()).toBe(200)
@@ -57,11 +56,12 @@ test('table and copied TSV distinguish identical labels and preserve input order
   await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
     writeText: async (text: string) => { Object.assign(window, { copiedLayout: text }) },
   } }))
+  await page.getByTestId('plan-review-confirmation').check()
   page.once('dialog', dialog => dialog.accept())
   await page.getByTestId('output-copy-tsv-btn').click()
   const tsv = await page.evaluate(() => (window as Window & { copiedLayout: string }).copiedLayout)
   const [headers, ...data] = tsv.split('\n').map(line => line.split('\t'))
-  expect(headers).toEqual(['Well', 'Gene', 'Type', 'Label', 'Sample #', 'Extra 1', 'Extra 2', 'Replicate', 'Plate'])
+  expect(headers).toEqual(['Well', 'Gene', 'Type', 'Label', 'Sample #', 'Sample ID', 'Extra 1', 'Extra 2', 'Replicate', 'Plate'])
   const firstGene = data[0][1]
   expect(data.filter(row => row[1] === firstGene && row[2] === 'Sample').map(row => row[4])).toEqual(sampleNumbers.map(String))
   expect(data.filter(row => row[2] === 'Blank').every(row => row[4] === '')).toBe(true)

@@ -1,18 +1,18 @@
 {
-  "name": "easylab-qpcr-planner",
-  "version": "0.1.0",
+  "name": "easylab-qpcr-planner-next",
+  "version": "0.3.0-dev.3",
   "description": "Easylab qPCR planner desktop app",
   "author": "Meghamsh Teja",
   "private": true,
   "main": "desktop/electron/main.cjs",
   "scripts": {
-    "dev": "npm --prefix modern-app run dev",
+    "dev": "npm --prefix modern-app run dev:full",
     "build": "npm --prefix modern-app run build",
     "lint": "npm --prefix modern-app run lint",
     "test:e2e": "npm --prefix modern-app run test:e2e",
     "screenshots": "npm --prefix modern-app run test:e2e",
     "icons": "node desktop/scripts/generate-icons.mjs",
-    "dev:electron": "concurrently -k \"npm --prefix modern-app run dev -- --host\" \"wait-on http://127.0.0.1:5176 && electron .\"",
+    "dev:electron": "npm --prefix modern-app run build && electron .",
     "build:electron": "npm --prefix modern-app run build && npm run icons && electron-builder --win --x64"
   },
   "devDependencies": {
@@ -24,8 +24,8 @@
     "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.meghamshteja.easylab.qpcrplanner",
-    "productName": "Easylab qPCR Planner",
+    "appId": "com.easylab.qpcrplanner.nextdev",
+    "productName": "EasyLab Next qPCR Planner (Dev)",
     "copyright": "Copyright © 2026 Meghamsh Teja. All Rights Reserved.",
     "directories": {
       "buildResources": "desktop/build",

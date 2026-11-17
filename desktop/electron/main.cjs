@@ -1,153 +1,167 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
-const { spawn } = require('child_process')
-const fs = require('fs')
-const net = require('net')
-const path = require('path')
+const { app, BrowserWindow, dialog, ipcMain } = require('electron')
+const { spawn } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
+const runtime = require('./next-runtime.cjs')
 
-const isDev = !app.isPackaged
-const rootDir = path.join(__dirname, '..', '..')
+const projectRoot = path.resolve(__dirname, '..', '..')
 const iconPath = path.join(__dirname, '..', 'build', 'icon.png')
-const webDist = path.join(rootDir, '.app-dist', 'web', 'index.html')
-
-const BACKEND_PORT = 8003
-const BACKEND_MODULE = 'backend.main:app'
-
+let runtimeLayout = null
 let backendProcess = null
+const downloadSessions = new WeakSet()
 
-const ensureDirectories = (paths) => {
-  const targets = Object.values(paths || {}).filter((val) => typeof val === 'string' && val.trim())
-  targets.forEach((target) => fs.mkdirSync(target, { recursive: true }))
+app.setName(runtime.MODULE.appName)
+if (process.platform === 'win32') app.setAppUserModelId(runtime.MODULE.appId)
+
+function showStartupError(error) {
+  const message = error instanceof Error ? error.message : String(error)
+  dialog.showErrorBox(`${runtime.MODULE.appName} could not start safely`, message)
+  process.exitCode = 1
+  app.quit()
 }
 
-const getDefaultPaths = () => {
-  const base = path.join(app.getPath('documents'), 'Easylab', 'qPCR Planner')
+function getDefaultPaths() {
   return {
-    dataPath: path.join(base, 'data'),
-    attachmentsPath: path.join(base, 'attachments'),
-    exportsPath: path.join(base, 'exports'),
-    syncPath: path.join(base, 'sync'),
+    dataPath: runtimeLayout.dataPath,
+    attachmentsPath: runtimeLayout.attachmentsPath,
+    exportsPath: runtimeLayout.exportsPath,
+    syncPath: runtimeLayout.syncPath,
+    settingsPath: runtimeLayout.settingsPath,
   }
 }
 
-const waitForPort = (port, timeoutMs = 8000) => new Promise((resolve, reject) => {
-  const start = Date.now()
-  const check = () => {
-    const socket = net.createConnection({ port }, () => {
-      socket.end()
-      resolve(true)
-    })
-    socket.on('error', () => {
-      socket.destroy()
-      if (Date.now() - start > timeoutMs) reject(new Error('timeout'))
-      else setTimeout(check, 300)
-    })
-  }
-  check()
-})
-
-const resolvePythonCandidates = () => {
-  const candidates = []
-  if (process.env.APP_PYTHON_PATH) candidates.push(process.env.APP_PYTHON_PATH)
-  if (!app.isPackaged) {
-    const localVenv = path.join(rootDir, 'modern-app', '.venv', process.platform === 'win32' ? 'Scripts', 'python.exe')
-    if (fs.existsSync(localVenv)) candidates.push(localVenv)
-  }
-  candidates.push('python', 'python3', 'py')
-  return Array.from(new Set(candidates))
-}
-
-const spawnBackend = async () => {
-  if (backendProcess) return
-  const backendParent = app.isPackaged
-    ? process.resourcesPath
-    : path.join(rootDir, 'modern-app')
-
-  const env = {
-    ...process.env,
-    PYTHONPATH: backendParent,
-  }
-
-  const candidates = resolvePythonCandidates()
-  for (const candidate of candidates) {
-    try {
-      const proc = spawn(candidate, ['-m', 'uvicorn', BACKEND_MODULE, '--port', String(BACKEND_PORT)], {
-        cwd: backendParent,
-        env,
-        stdio: 'ignore',
-        windowsHide: true,
-      })
-
-      const ready = await Promise.race([
-        waitForPort(BACKEND_PORT, 6000),
-        new Promise((_, reject) => proc.once('error', reject)),
-      ])
-
-      if (ready) {
-        backendProcess = proc
-        proc.on('exit', () => {
-          backendProcess = null
-        })
-        return
-      }
-    } catch (err) {
-      continue
+function ensureDirectories(paths) {
+  for (const value of Object.values(paths || {})) {
+    if (typeof value !== 'string' || !value.trim()) continue
+    const target = path.resolve(value)
+    if (!runtime.isPathInsideOrEqual(runtimeLayout.runtimeRoot, target)) {
+      throw new Error('New directories must stay inside the qPCR Planner Next runtime.')
     }
+    runtime.ensureDirectoryTree(target)
+  }
+}
+
+function chooseDownloadPath(filename) {
+  const safeName = path.basename(String(filename || 'download').replace(/[\\/]/g, path.sep))
+  const parsed = path.parse(safeName)
+  let candidate = path.join(runtimeLayout.exportsPath, safeName)
+  let suffix = 1
+  while (fs.existsSync(candidate)) {
+    candidate = path.join(runtimeLayout.exportsPath, `${parsed.name} (${suffix})${parsed.ext}`)
+    suffix += 1
+  }
+  return candidate
+}
+
+function stopBackend() {
+  if (backendProcess && backendProcess.exitCode === null && !backendProcess.killed) {
+    backendProcess.kill('SIGTERM')
+  }
+  backendProcess = null
+}
+
+async function startBackend() {
+  runtime.ensureRuntimeLayout(runtimeLayout)
+  runtime.assertNoSymlinkPathComponents(runtimeLayout.pythonEnvRoot)
+  if (!fs.existsSync(runtimeLayout.pythonPath)) {
+    throw new Error(`The isolated qPCR Planner Python environment is missing: ${runtimeLayout.pythonPath}`)
   }
 
-  dialog.showMessageBox({
-    type: 'warning',
-    title: 'Backend not started',
-    message: 'The qPCR backend could not start. Install Python 3.10+ or set APP_PYTHON_PATH, then restart.',
+  const environment = runtime.buildBackendEnvironment(
+    process.env,
+    runtimeLayout,
+    runtimeLayout.backendRoot,
+  )
+  const child = spawn(runtimeLayout.pythonPath, ['-I', runtimeLayout.backendScript], {
+    cwd: runtimeLayout.backendDirectory,
+    env: environment,
+    stdio: 'ignore',
+    windowsHide: true,
   })
-}
+  backendProcess = child
+  child.once('exit', () => {
+    if (backendProcess === child) backendProcess = null
+  })
 
-const stopBackend = () => {
-  if (backendProcess) {
-    backendProcess.kill()
-    backendProcess = null
+  try {
+    await Promise.race([
+      runtime.waitForOwnedHealth(child),
+      new Promise((_, reject) => child.once('error', reject)),
+    ])
+  } catch (error) {
+    if (child.exitCode === null && !child.killed) child.kill('SIGTERM')
+    if (backendProcess === child) backendProcess = null
+    throw error
   }
 }
 
-const createWindow = () => {
+function createWindow() {
   const win = new BrowserWindow({
-    width: 1440,
+    width: 1400,
     height: 900,
     minWidth: 1024,
     minHeight: 640,
     resizable: true,
     backgroundColor: '#0F172A',
-    title: app.getName(),
+    title: runtime.MODULE.appName,
     icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
+      partition: 'persist:easylab-next-qpcr-planner',
     },
   })
 
-  if (isDev) {
-    const devUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5176'
-    win.loadURL(devUrl)
+  if (!downloadSessions.has(win.webContents.session)) {
+    downloadSessions.add(win.webContents.session)
+    win.webContents.session.on('will-download', (_event, item) => {
+      item.setSavePath(chooseDownloadPath(item.getFilename()))
+    })
+  }
+  win.loadFile(runtimeLayout.webDistPath).catch(showStartupError)
+  return win
+}
+
+try {
+  runtime.assertNoSourceOverrides(process.env)
+  runtimeLayout = runtime.resolveRuntimeLayout({
+    projectRoot,
+    isPackaged: app.isPackaged,
+    appDataRoot: app.getPath('appData'),
+    resourcesPath: process.resourcesPath,
+  })
+  runtime.assertPathOverridesMatchLayout(process.env, runtimeLayout)
+  runtime.ensureRuntimeLayout(runtimeLayout)
+  runtimeLayout = Object.freeze({
+    ...runtimeLayout,
+    webDistPath: runtime.assertLocalWebBuild(projectRoot),
+  })
+  app.setPath('userData', runtimeLayout.userDataPath)
+  app.setPath('sessionData', runtimeLayout.sessionDataPath)
+  app.setPath('downloads', runtimeLayout.exportsPath)
+} catch (error) {
+  showStartupError(error)
+  runtimeLayout = null
+}
+
+if (runtimeLayout) {
+  const gotLock = app.requestSingleInstanceLock()
+  if (!gotLock) {
+    app.quit()
   } else {
-    win.loadFile(webDist)
+    app.whenReady().then(async () => {
+      await startBackend()
+      createWindow()
+      app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+      })
+    }).catch(showStartupError)
   }
 }
 
-app.whenReady().then(async () => {
-  await spawnBackend()
-  createWindow()
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-app.on('before-quit', () => {
-  stopBackend()
-})
-
+app.on('before-quit', stopBackend)
 app.on('window-all-closed', () => {
-  stopBackend()
   if (process.platform !== 'darwin') app.quit()
 })
 
@@ -155,7 +169,7 @@ ipcMain.handle('select-directory', async (_event, options = {}) => {
   const { title, defaultPath } = options
   const result = await dialog.showOpenDialog({
     title: title || 'Select folder',
-    defaultPath,
+    defaultPath: defaultPath || runtimeLayout?.exportsPath,
     properties: ['openDirectory', 'createDirectory'],
   })
   if (result.canceled || result.filePaths.length === 0) return null
@@ -166,8 +180,8 @@ ipcMain.handle('ensure-directories', async (_event, paths) => {
   try {
     ensureDirectories(paths)
     return { ok: true }
-  } catch (err) {
-    return { ok: false, message: err instanceof Error ? err.message : String(err) }
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : String(error) }
   }
 })
 

@@ -28,7 +28,7 @@ const waitForApi = async (request: { get: (url: string) => Promise<{ status: () 
     .poll(
       async () => {
         try {
-          const res = await request.get('http://127.0.0.1:8003/openapi.json')
+          const res = await request.get('http://127.0.0.1:18512/openapi.json')
           return res.status()
         } catch {
           return 0
@@ -42,7 +42,7 @@ const waitForApi = async (request: { get: (url: string) => Promise<{ status: () 
 test('API keeps repeated sample IDs as distinct sample occurrences', async ({ request }) => {
   await waitForApi(request)
 
-  const res = await request.post('http://127.0.0.1:8003/plan', {
+  const res = await request.post('http://127.0.0.1:18512/plan', {
     data: {
       num_samples: 0,
       num_standards: 0,
@@ -98,7 +98,7 @@ test('API packs genes by chemistry and aligns each gene block to column 1', asyn
     gene_plate_overrides: {}
   }
 
-  const res = await request.post('http://127.0.0.1:8003/plan', { data: payload })
+  const res = await request.post('http://127.0.0.1:18512/plan', { data: payload })
   expect(res.status()).toBe(200)
   const json = (await res.json()) as PlanResponse
 
@@ -136,7 +136,7 @@ test('API does not mix chemistries on a single plate', async ({ request }) => {
     gene_plate_overrides: {}
   }
 
-  const res = await request.post('http://127.0.0.1:8003/plan', { data: payload })
+  const res = await request.post('http://127.0.0.1:18512/plan', { data: payload })
   expect(res.status()).toBe(200)
   const json = (await res.json()) as PlanResponse
 
@@ -174,6 +174,8 @@ test('qPCR planner flow', async ({ page, request }) => {
   const outputCard = page.getByTestId('output-card')
   const masterCard = page.getByTestId('master-card')
   const notesCard = page.getByTestId('notes-card')
+  // SampleId namespaces are intentionally random per experiment; mask every displayed identity in golden screenshots.
+  const sampleIdCells = page.getByTestId('sample-identity')
 
   // Initial plan view (before compute) + plan card
   await expect(page).toHaveScreenshot('plan_view.png', { fullPage: true })
@@ -189,11 +191,11 @@ test('qPCR planner flow', async ({ page, request }) => {
   await expect(previewCard).toHaveScreenshot('plate_preview.png')
 
   // Full page after compute (layout + mix)
-  await expect(page).toHaveScreenshot('layout_full.png', { fullPage: true })
-  await expect(page).toHaveScreenshot('example_run.png', { fullPage: true })
+  await expect(page).toHaveScreenshot('layout_full.png', { fullPage: true, mask: [sampleIdCells], maskColor: '#ffffff' })
+  await expect(page).toHaveScreenshot('example_run.png', { fullPage: true, mask: [sampleIdCells], maskColor: '#ffffff' })
 
   // Layout/output card
-  await expect(outputCard).toHaveScreenshot('output_tab.png')
+  await expect(outputCard).toHaveScreenshot('output_tab.png', { mask: [sampleIdCells], maskColor: '#ffffff' })
 
   // Master mix card
   await expect(masterCard).toHaveScreenshot('master_mix.png')
