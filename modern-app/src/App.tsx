@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
+import { cdnaSampleLines, readCdnaHandoff, type CdnaHandoff } from './cdnaHandoff'
 import { GuidedTutorial, type TutorialStep } from './GuidedTutorial'
 import RecipeWorkflow, { type Chemistry, type Recipe, type RecipePreset, type PlannedMix } from './RecipeWorkflow'
 
@@ -270,6 +271,10 @@ function App() {
   const [usePasted, setUsePasted] = useState(true)
   const [experimentId, setExperimentId] = useState(createExperimentId)
   const [sampleText, setSampleText] = useState(DEFAULT_SAMPLE_TEXT)
+  const [cdnaHandoff, setCdnaHandoff] = useState<CdnaHandoff | null>(null)
+  const [cdnaStatus, setCdnaStatus] = useState('')
+  const [cdnaInputConfirmed, setCdnaInputConfirmed] = useState(false)
+  const cdnaImportSequence = useRef(0)
   const [numSamples, setNumSamples] = useState(DEFAULT_SAMPLE_COUNT)
   const [numStandards, setNumStandards] = useState(8)
   const [numPos, setNumPos] = useState(0)
@@ -597,6 +602,40 @@ function App() {
     setSampleText(value)
   }
 
+  const inspectCdnaPackage = async (file: File) => {
+    const request = ++cdnaImportSequence.current
+    setCdnaHandoff(null)
+    setCdnaInputConfirmed(false)
+    setCdnaStatus('Checking cDNA package…')
+    try {
+      const handoff = await readCdnaHandoff(file)
+      if (request !== cdnaImportSequence.current) return
+      setCdnaHandoff(handoff)
+      setCdnaStatus('')
+    } catch (error) {
+      if (request === cdnaImportSequence.current) {
+        setCdnaStatus(error instanceof Error ? error.message : 'Could not open the cDNA package.')
+      }
+    }
+  }
+
+  const useCdnaSamples = () => {
+    if (!cdnaHandoff || !cdnaInputConfirmed) return
+    planRequestSequence.current += 1
+    setLoading(false)
+    setUsePasted(true)
+    setSampleText(cdnaSampleLines(cdnaHandoff))
+    setExperimentId(createExperimentId())
+    setTemplateAvailableUl({})
+    setSampleConcentration('')
+    setTemplateBudget(null)
+    setPlanReviewConfirmed(false)
+    setLastPlanFingerprint(null)
+    setCdnaHandoff(null)
+    setCdnaInputConfirmed(false)
+    setCdnaStatus(`Samples copied from “${cdnaHandoff.name}”, revision ${cdnaHandoff.revision}. Review the list and calculate a new layout.`)
+  }
+
   const handleSampleCountChange = (value: string) => {
     const nextCount = parseInt(value || '0', 10)
     if (nextCount !== numSamples) {
@@ -794,6 +833,10 @@ function App() {
   }
 
   const restorePackage = (pkg: PlannerPackage) => {
+    cdnaImportSequence.current += 1
+    setCdnaHandoff(null)
+    setCdnaStatus('')
+    setCdnaInputConfirmed(false)
     const settings = {
       ...pkg.settings,
       experimentId: pkg.settings.experimentId || createExperimentId(),
@@ -912,6 +955,10 @@ function App() {
   }
 
   const startNewExperiment = () => {
+    cdnaImportSequence.current += 1
+    setCdnaHandoff(null)
+    setCdnaStatus('')
+    setCdnaInputConfirmed(false)
     planRequestSequence.current += 1
     setLoading(false)
     setPlanReviewConfirmed(false)
@@ -1185,6 +1232,38 @@ function App() {
                 </label>
               </div>
             )}
+            <details className="package-details">
+              <summary>Import samples from cDNA Calculator</summary>
+              <div className="package-panel">
+                <p className="help">Open a reviewed cDNA experiment package. You can check its samples before replacing this list.</p>
+                <label className="ghost file-pick-button">Choose cDNA package
+                  <input type="file" accept=".json,application/json" aria-label="Choose cDNA package" onChange={event => {
+                    const file = event.currentTarget.files?.[0]
+                    event.currentTarget.value = ''
+                    if (file) void inspectCdnaPackage(file)
+                  }} />
+                </label>
+                {cdnaStatus && <p role="status">{cdnaStatus}</p>}
+                {cdnaHandoff && <>
+                  <h3>{cdnaHandoff.name} · revision {cdnaHandoff.revision}</h3>
+                  <p>{cdnaHandoff.samples.filter(sample => sample.ready).length} ready of {cdnaHandoff.samples.length} source rows</p>
+                  <ul>
+                    {cdnaHandoff.samples.map((sample, index) => <li key={`${sample.sourceRow}-${index}`}>
+                      {sample.label || 'Unnamed sample'} · row {sample.sourceRow} · {sample.ready ? 'Ready' : sample.reason || 'Not ready'}
+                    </li>)}
+                  </ul>
+                  <p className="help">Only sample labels are carried forward. Set the measured template concentration separately if the qPCR recipe uses mass-based input.</p>
+                  {recipesByChemistry && <p className="help">
+                    Current input per reaction: {(['SYBR', 'TaqMan'] as const).map(chemistry => {
+                      const input = recipesByChemistry[chemistry].sample_input
+                      return `${chemistry} ${input.value} ${input.unit === 'uL' ? 'µL' : input.unit}`
+                    }).join(' · ')}
+                  </p>}
+                  <label><input type="checkbox" checked={cdnaInputConfirmed} onChange={event => setCdnaInputConfirmed(event.target.checked)} /> I checked the qPCR recipe input per reaction</label>
+                  <button className="primary" type="button" disabled={!cdnaInputConfirmed || !recipesByChemistry} onClick={useCdnaSamples}>Replace list with ready samples</button>
+                </>}
+              </div>
+            </details>
             <p className="help">Format: label [col2] [col3] … (col2 becomes Group if it is the only extra column).</p>
             <div className="helper">
               <div className="helper-head">
